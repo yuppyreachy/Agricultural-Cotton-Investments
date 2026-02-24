@@ -216,14 +216,23 @@ a:hover{color:#00f0ff;}
     <canvas id="roiChart" width="400" height="200"></canvas>
 </div>
 
+<!-- ================= LIVE CHAT ================= -->
+<div class="card chat-column" id="chatColumn">
+    <h3>Live Chat</h3>
+    <div id="chatMessages">
+        <!-- Existing messages from DB can be injected server-side if needed -->
+    </div>
+</div>
+<input id="chatInput" type="text" placeholder="Type a message...">
+
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
 const chatInput = document.getElementById("chatInput");
-const chatColumn = document.getElementById("chatColumn");
+const chatMessages = document.getElementById("chatMessages");
 
-// Current logged-in user's ID (from server-side template)
-const userId = "<%= user._id %>";
+// Current logged-in user's ID from server-side template
+const userId = "<%= user._id %>"; 
 
 // -------------------------
 // JOIN AS USER
@@ -234,13 +243,13 @@ socket.emit("user-join", userId);
 // SEND MESSAGE TO ADMIN
 // -------------------------
 chatInput.addEventListener("keypress", e => {
-    if (e.key === "Enter" && chatInput.value.trim() !== "") {
+    if(e.key === "Enter" && chatInput.value.trim() !== ""){
         const text = chatInput.value.trim();
 
         // Send to server
         socket.emit("user-message", { userId, text });
 
-        // Show locally
+        // Display locally
         displayMessage({ sender: "user", text });
 
         chatInput.value = "";
@@ -248,14 +257,14 @@ chatInput.addEventListener("keypress", e => {
 });
 
 // -------------------------
-// RECEIVE MESSAGES (FROM SERVER)
+// RECEIVE MESSAGES FROM SERVER
 // -------------------------
 socket.on("receive-message", msg => {
     displayMessage(msg);
 });
 
 // -------------------------
-// ADMIN ONLINE / OFFLINE NOTIFICATIONS
+// ADMIN ONLINE / OFFLINE
 // -------------------------
 socket.on("admin-online", () => {
     displaySystemMessage("Admin is online ✅");
@@ -268,22 +277,23 @@ socket.on("admin-offline", () => {
 // -------------------------
 // HELPER FUNCTIONS
 // -------------------------
-function displayMessage(msg) {
+function displayMessage(msg){
     const div = document.createElement("div");
     div.classList.add("chat-message", msg.sender);
     const senderLabel = msg.sender === "admin" ? "ADMIN" : msg.sender === "system" ? "SYSTEM" : "YOU";
     div.textContent = `${senderLabel}: ${msg.text}`;
-    chatColumn.appendChild(div);
-    chatColumn.scrollTop = chatColumn.scrollHeight;
+    chatMessages.appendChild(div);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function displaySystemMessage(text) {
-    const div = document.createElement("div");
-    div.classList.add("chat-message", "system");
-    div.textContent = `SYSTEM: ${text}`;
-    chatColumn.appendChild(div);
-    chatColumn.scrollTop = chatColumn.scrollHeight;
+function displaySystemMessage(text){
+    displayMessage({ sender: "system", text });
 }
+
+// -------------------------
+// AUTO-SCROLL TO LATEST
+// -------------------------
+chatMessages.scrollTop = chatMessages.scrollHeight;
 
 
 // ================= CHARTS =================
