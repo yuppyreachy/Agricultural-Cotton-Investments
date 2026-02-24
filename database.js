@@ -1,6 +1,7 @@
 const sqlite3 = require("sqlite3").verbose();
 const path = require("path");
 
+const bcrypt = require("bcrypt");
 const dbPath = path.join(__dirname, "database.sqlite");
 
 console.log("📂 Using database at:", dbPath);
@@ -172,5 +173,6 @@ db.serialize(() => {
   `);
 
 });
+
 
 module.exports = db;
