@@ -7,6 +7,8 @@ const multer = require("multer");
 const { promisify } = require("util");
 const axios = require("axios");
 const db = require("../db");
+const sendEmail = require('../utils/emailService'); // ✅ relative path
+
 
 // ----- Multer setup for KYC uploads -----
 const storage = multer.diskStorage({
@@ -121,6 +123,19 @@ router.post(
     }
   }
 );
+
+router.post("/register", async (req, res) => {
+  // after saving user to database
+
+  await sendEmail(
+    req.body.email,
+    "Welcome to Our Investment Platform 🚀",
+    `<h2>Welcome ${req.body.username}</h2>
+     <p>Your account has been created successfully.</p>`
+  );
+
+  res.redirect("/dashboard");
+});
 
 // ----- LOGIN -----
 router.post("/admin/login", async (req, res) => {
