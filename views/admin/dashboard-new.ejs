@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* ================= RESET ================= */
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Poppins',sans-serif;}
+body { background:#111; color:#fff; }
+a { text-decoration:none; color:inherit; }
+button { cursor:pointer; }
+.container { display:flex; height:100vh; overflow:hidden; }
+/* ================= SIDEBAR ================= */
+.sidebar {
+    width:220px;
+    background:#000;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+}
+.sidebar h2 { color:#FFD700; margin-bottom:20px; }
+.sidebar a { padding:10px; display:block; color:#fff; border-radius:5px; transition:0.2s; }
+.sidebar a:hover { background:#222; }
+/* ================= MAIN ================= */
+.main {
+    flex:1;
+    padding:20px;
+    display:flex;
+    flex-direction:column;
+    gap:20px;
+    overflow-y:auto;
+}
+/* ================= TABLES ================= */
+table { width:100%; border-collapse:collapse; margin-bottom:20px; }
+th, td { padding:10px; text-align:left; border-bottom:1px solid #333; }
+th { background:#222; color:#FFD700; }
+td button { background:#FFD700; border:none; color:#000; padding:5px 10px; border-radius:5px; }
+/* ================= CARDS ================= */
+.card {
+    background:#111;
+    border:1px solid #222;
+    border-radius:10px;
+    padding:15px;
+    box-shadow: 0 0 10px rgba(255,215,0,0.2);
+}
+/* ================= CHARTS ================= */
+canvas { background:#111; border-radius:10px; }
+/* ================= CHAT ================= */
+.chat-box { background:#111; border:1px solid #222; border-radius:10px; padding:10px; height:300px; display:flex; flex-direction:column; justify-content:flex-end; overflow-y:auto; }
+.chat-input { margin-top:10px; display:flex; gap:10px; }
+.chat-input input { flex:1; padding:10px; border-radius:5px; border:none; }
+.chat-input button { padding:10px 20px; border:none; border-radius:5px; background:#FFD700; color:#000; }
+</style>
+</head>
+<body>
+<div class="container">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+        <h2>ELITE ADMIN</h2>
+        <a href="/admin/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main">
+        <!-- USERS TABLE -->
+        <div class="card">
+            <h3>Users</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Balance</th>
+                        <th>Profit</th>
+                        <th>KYC</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table">
+                    <% users.forEach(user => { %>
+                        <tr>
+                            <td><%= user.name %></td>
+                            <td><%= user.email %></td>
+                            <td>$<%= user.balance %></td>
+                            <td>$<%= user.profit || 0 %></td>
+                            <td><%= user.kyc_status ? "Approved ✅" : "Pending ❌" %></td>
+                            <td>
+                                <button onclick="viewUser('<%= user.id %>')">View</button>
+                                <button onclick="addBalance('<%= user.id %>')">Add Balance</button>
+                            </td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- REQUESTS TABLES -->
+        <div class="card">
+            <h3>Deposit Requests</h3>
+            <table id="deposit-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Fill dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Withdrawal Requests</h3>
+            <table id="withdraw-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Fill dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Loan Requests</h3>
+            <table id="loan-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Fill dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>KYC Requests</h3>
+            <table id="kyc-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Document</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Fill dynamically via JS -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- CHARTS -->
+        <div class="card">
+            <h3>Company Profit</h3>
+            <canvas id="profitChart" height="150"></canvas>
+        </div>
+
+        <div class="card">
+            <h3>Live ROI</h3>
+            <canvas id="roiChart" height="150"></canvas>
+        </div>
+
+        <!-- LIVE CHAT -->
+        <div class="card">
+            <h3>Live Chat</h3>
+            <div class="chat-box" id="chatBox"></div>
+            <div class="chat-input">
+                <input type="text" id="chatMessage" placeholder="Type a message..."/>
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+async function fetchRequests() {
+    const deposit = await fetch('/admin/deposits').then(r => r.json());
+    const withdraw = await fetch('/admin/withdraws').then(r => r.json());
+    const loan = await fetch('/admin/loans').then(r => r.json());
+    const kyc = await fetch('/admin/kyc').then(r => r.json());
+
+    const depositTable = document.querySelector('#deposit-table tbody');
+    depositTable.innerHTML = '';
+    deposit.forEach(d => {
+        depositTable.innerHTML += `<tr>
+            <td>${d.userName}</td>
+            <td>$${d.amount}</td>
+            <td>${d.status}</td>
+            <td>
+                <button onclick="updateDeposit('${d.id}','approve')">✅</button>
+                <button onclick="updateDeposit('${d.id}','decline')">❌</button>
+            </td>
+        </tr>`;
+    });
+
+    const withdrawTable = document.querySelector('#withdraw-table tbody');
+    withdrawTable.innerHTML = '';
+    withdraw.forEach(w => {
+        withdrawTable.innerHTML += `<tr>
+            <td>${w.userName}</td>
+            <td>$${w.amount}</td>
+            <td>${w.status}</td>
+            <td>
+                <button onclick="updateWithdraw('${w.id}','approve')">✅</button>
+                <button onclick="updateWithdraw('${w.id}','decline')">❌</button>
+            </td>
+        </tr>`;
+    });
+
+    const loanTable = document.querySelector('#loan-table tbody');
+    loanTable.innerHTML = '';
+    loan.forEach(l => {
+        loanTable.innerHTML += `<tr>
+            <td>${l.userName}</td>
+            <td>$${l.amount}</td>
+            <td>${l.status}</td>
+            <td>
+                <button onclick="updateLoan('${l.id}','approve')">✅</button>
+                <button onclick="updateLoan('${l.id}','decline')">❌</button>
+            </td>
+        </tr>`;
+    });
+
+    const kycTable = document.querySelector('#kyc-table tbody');
+    kycTable.innerHTML = '';
+    kyc.forEach(k => {
+        kycTable.innerHTML += `<tr>
+            <td>${k.userName}</td>
+            <td>${k.document}</td>
+            <td>${k.status}</td>
+            <td>
+                <button onclick="updateKYC('${k.id}','approve')">✅</button>
+                <button onclick="updateKYC('${k.id}','decline')">❌</button>
+            </td>
+        </tr>`;
+    });
+}
+
+async function updateDeposit(id, action) {
+    await fetch(`/admin/deposit/${id}/${action}`, { method:'POST' });
+    fetchRequests();
+}
+async function updateWithdraw(id, action) {
+    await fetch(`/admin/withdraw/${id}/${action}`, { method:'POST' });
+    fetchRequests();
+}
+async function updateLoan(id, action) {
+    await fetch(`/admin/loan/${id}/${action}`, { method:'POST' });
+    fetchRequests();
+}
+async function updateKYC(id, action) {
+    await fetch(`/admin/kyc/${id}/${action}`, { method:'POST' });
+    fetchRequests();
+}
+
+// ================= CHARTS =================
+const profitChart = new Chart(document.getElementById('profitChart').getContext('2d'), {
+    type:'line',
+    data: { labels:[''], datasets:[{ label:'Profit', data:[0], borderColor:'lime', fill:false }] },
+});
+const roiChart = new Chart(document.getElementById('roiChart').getContext('2d'), {
+    type:'line',
+    data: { labels:[''], datasets:[{ label:'ROI', data:[0], borderColor:'yellow', fill:false }] },
+});
+
+// ================= CHAT =================
+function sendMessage() {
+    const msgInput = document.getElementById('chatMessage');
+    const msg = msgInput.value;
+    if(!msg) return;
+    const chatBox = document.getElementById('chatBox');
+    chatBox.innerHTML += `<div><b>Admin:</b> ${msg}</div>`;
+    msgInput.value='';
+}
+
+// ================= INIT =================
+fetchRequests();
+</script>
+</body>
+</html>
