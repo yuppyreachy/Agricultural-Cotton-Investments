@@ -435,9 +435,11 @@ app.get("/deposit", (req, res) => {
   }
   res.render("deposit");
 });
-app.get("/admin-login", (req, res) => {
-  res.render("admin/login"); // make sure this file exists
+app.get("/admin/dashboard", (req, res) => {
+  if(!req.session.admin) return res.redirect("/admin-login");
+  res.send("Welcome Admin! 🚀");
 });
+
 
 app.get("/withdraw",(req,res)=> sendPage(res,"withdraw.html"));
 app.get("/kyc",(req,res)=> sendPage(res,"kyc.html"));
@@ -744,24 +746,30 @@ app.post("/kyc", checkAuth, (req, res) => {
 // ==============================
 // ADMIN LOGIN PROCESS
 // ==============================
-app.post("/admin-login", (req, res) => {
-  const username = req.body.username?.trim();
-  const password = req.body.password?.trim();
+app.post("/admin-login", async (req, res) => {
+  const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.send("Missing credentials ❌");
-  }
+  if (!username || !password) return res.send("All fields required");
 
-  if (
-    username === process.env.ADMIN_USER &&
-    password === process.env.ADMIN_PASS
-  ) {
+  try {
+    const admin = await dbGet("SELECT * FROM admin WHERE username = ?", [username]);
+
+    if (!admin) return res.send("Invalid admin login ❌");
+
+    const match = await bcrypt.compare(password, admin.password);
+    if (!match) return res.send("Invalid admin login ❌");
+
+    // ✅ Correct session setup
     req.session.admin = true;
-    return res.redirect("/admin/dashboard");
-  }
+    req.session.adminId = admin.id;
 
-  res.send("Invalid admin login ❌");
+    res.redirect("/admin/dashboard");
+  } catch (err) {
+    console.error("Admin login error:", err);
+    res.send("Server error ❌");
+  }
 });
+
 
 // ============================
 // POST /deposit
