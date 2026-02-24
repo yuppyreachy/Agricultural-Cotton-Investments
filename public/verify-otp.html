@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Verify OTP</title>
+<style>
+body{margin:0;font-family:Arial;background:linear-gradient(135deg,#020617,#0a0f2c);height:100vh;display:flex;align-items:center;justify-content:center;color:#fff}
+.box{background:#0f172a;padding:45px;border-radius:14px;width:360px;text-align:center;box-shadow:0 0 40px rgba(0,0,0,.7)}
+h2{color:#00ffd5}
+input{width:100%;padding:15px;margin-top:20px;border:none;border-radius:8px;background:#020617;color:#fff;text-align:center;letter-spacing:4px}
+button{width:100%;padding:14px;margin-top:20px;background:#00ffd5;border:none;border-radius:10px;font-weight:bold}
+</style>
+</head>
+<body>
+<div class="box">
+<h2>Email Verification</h2>
+<input placeholder="Enter OTP">
+<button onclick="go()">Verify</button>
+</div>
+<script>
+function go(){
+alert("Verification successful");
+window.location="verify.html";
+}
+</script>
+</body>
+</html>

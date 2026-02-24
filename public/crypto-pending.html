@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Crypto Deposit Pending</title>
+<style>
+body{
+  background:black;
+  color:white;
+  font-family:Arial, sans-serif;
+  text-align:center;
+  padding-top:80px;
+}
+h1{
+  color:gold;
+  font-size:36px;
+  margin-bottom:20px;
+}
+p{
+  font-size:18px;
+  margin:5px 0;
+}
+#count{
+  font-size:24px;
+  margin:20px 0;
+  color:gold;
+  font-weight:bold;
+}
+.support{
+  margin-top:40px;
+  font-size:16px;
+}
+.support a{
+  color:gold;
+  text-decoration:none;
+  margin:0 10px;
+}
+.spinner {
+  margin: 30px auto;
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255,215,0,0.2);
+  border-top-color: gold;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+</style>
+</head>
+
+<body>
+
+<h1>🪙 Crypto Deposit Pending</h1>
+<p>Your crypto payment has been detected.</p>
+<p>Waiting for blockchain confirmation...</p>
+
+<div class="spinner"></div>
+<div id="count">120s</div>
+
+<div class="support">
+Need help? Contact us on 
+<a href="https://t.me/Afoundationservicecenter" target="_blank">Telegram</a>
+</div>
+
+<script>
+let t = 120; // realistic confirmation time in seconds
+const countEl = document.getElementById("count");
+
+const timer = setInterval(()=>{
+  countEl.innerHTML = "Confirming... " + t + "s";
+  t--;
+
+  if(t <= 0){
+    clearInterval(timer);
+    countEl.innerHTML = "✅ Deposit Under Review!";
+    // Optional: You can also show another message
+    setTimeout(()=>{
+      window.location.href="/dashboard";
+    },2000);
+  }
+
+},1000);
+</script>
+
+</body>
+</html>

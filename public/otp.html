@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verify OTP</title>
+
+<style>
+body{
+    margin:0;
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #111, #000);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+}
+
+/* glowing background effect */
+body::before{
+    content:"";
+    position:absolute;
+    width:600px;
+    height:600px;
+    background:radial-gradient(circle, rgba(255,215,0,0.15), transparent 70%);
+    top:-150px;
+    right:-150px;
+    filter:blur(80px);
+}
+
+/* main card */
+.otp-card{
+    position:relative;
+    width:420px;
+    padding:40px;
+    border-radius:20px;
+    background:linear-gradient(145deg,#0f0f17,#0a0a0f);
+    border:1px solid rgba(255,215,0,0.25);
+    box-shadow:
+        0 0 25px rgba(255,215,0,0.15),
+        inset 0 0 25px rgba(255,215,0,0.05);
+    text-align:center;
+    backdrop-filter:blur(10px);
+}
+
+/* title */
+.otp-card h2{
+    color:gold;
+    font-size:28px;
+    margin-bottom:5px;
+    letter-spacing:1px;
+}
+
+/* subtitle */
+.otp-card p{
+    color:#aaa;
+    font-size:14px;
+    margin-bottom:25px;
+}
+
+/* input */
+.otp-card input{
+    width:100%;
+    padding:15px;
+    margin-top:10px;
+    border-radius:12px;
+    border:1px solid rgba(255,215,0,0.3);
+    background:#111827;
+    color:white;
+    font-size:18px;
+    text-align:center;
+    outline:none;
+    transition:0.3s;
+}
+
+.otp-card input:focus{
+    border:1px solid gold;
+    box-shadow:0 0 10px gold;
+}
+
+/* button */
+.btn-golden{
+    width:100%;
+    padding:15px;
+    margin-top:20px;
+    border:none;
+    border-radius:12px;
+    font-size:16px;
+    font-weight:bold;
+    background:linear-gradient(45deg,gold,#ffcc00);
+    color:black;
+    cursor:pointer;
+    transition:0.3s;
+    letter-spacing:1px;
+}
+
+.btn-golden:hover{
+    transform:scale(1.03);
+    box-shadow:0 0 25px gold;
+}
+
+/* logo */
+.logo{
+    font-size:22px;
+    color:gold;
+    font-weight:bold;
+    margin-bottom:20px;
+    letter-spacing:2px;
+}
+
+/* footer */
+.footer{
+    margin-top:20px;
+    font-size:12px;
+    color:#666;
+}
+</style>
+</head>
+
+<body>
+
+<div class="otp-card">
+  <div class="logo">★ ELITE INVEST</div>
+
+  <h2>Verify OTP</h2>
+  <p>We sent a secure code to your email</p>
+
+  <form method="POST" action="/verify-otp">
+    <input type="hidden" name="email" id="emailInput">
+    <input type="number" name="otp" placeholder="Enter 6-digit OTP" required>
+    <button type="submit" class="btn-golden">VERIFY & LOGIN</button>
+  </form>
+
+  <div class="footer">
+    Secure verification • Protected by Elite Security
+  </div>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const email = params.get("email");
+document.getElementById("emailInput").value = email;
+</script>
+
+</body>
+</html>

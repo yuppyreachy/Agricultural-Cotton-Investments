@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Us - Agricultural Foundation</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 40px; background: #f9f9f9; }
+    .container { max-width: 600px; margin: auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #2E7D32; }
+    form { display: flex; flex-direction: column; gap: 15px; }
+    input, textarea { padding: 12px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px; width: 100%; }
+    input:focus, textarea:focus { border-color: #2E7D32; outline: none; }
+    button { padding: 12px; font-size: 16px; background-color: #2E7D32; color: white; border: none; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+    button:hover { background-color: #1B4D1B; }
+    #responseMessage { margin-top: 15px; font-weight: bold; display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Contact Us</h1>
+    <form id="contactForm">
+      <input type="text" name="name" placeholder="Your Name" required />
+      <input type="email" name="email" placeholder="Your Email" required />
+      <textarea name="message" placeholder="Your Message" rows="6" required></textarea>
+      <button type="submit">Send Message</button>
+    </form>
+    <p id="responseMessage"></p>
+  </div>
+
+  <script>
+    const form = document.getElementById('contactForm');
+    const responseMessage = document.getElementById('responseMessage');
+
+    form.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const formData = {
+        name: form.name.value,
+        email: form.email.value,
+        message: form.message.value
+      };
+
+      try {
+        const res = await fetch('/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await res.text();
+        responseMessage.textContent = data;
+        responseMessage.style.color = 'green';
+        responseMessage.style.display = 'block';
+        form.reset();
+      } catch (err) {
+        responseMessage.textContent = 'Error sending message. Please try again.';
+        responseMessage.style.color = 'red';
+        responseMessage.style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html>
+
+    <div class="contact-info">
+      <p>Email: support@servicecenteragriculturalfoundation.com</p>
+      <p>Email: support@agriculturalfoundation.com</p>
+      <p>Phone: +213 123 456 789</p>
+      <p>Phone: +1 321xxxxxxx</p>
+      <p>Address: 123 Cotton Road, Algiers, Algeria</p>
+      <p>Address: 563 Cotton Road, lake city, usa</p>
+    </div>
+  </div>
+</body>
+</html>

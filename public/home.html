@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cotton Investment Platform</title>
+<style>
+/* ===== GLOBAL ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+
+body {
+  background: #f4f6f9;
+  color: #333;
+}
+
+/* ===== NAVBAR ===== */
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 50px;
+  background: #007bff;
+  color: white;
+}
+
+nav .logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+nav a {
+  color: white;
+  margin-left: 20px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* ===== HERO SECTION ===== */
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 80px 50px;
+  background: linear-gradient(135deg, #007bff 0%, #00c6ff 100%);
+  color: white;
+  border-radius: 0 0 50px 50px;
+}
+
+.hero-text {
+  max-width: 500px;
+}
+
+.hero-text h1 {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.hero-text p {
+  font-size: 18px;
+  margin-bottom: 30px;
+}
+
+.hero-buttons a {
+  display: inline-block;
+  padding: 12px 25px;
+  background: white;
+  color: #007bff;
+  font-weight: bold;
+  border-radius: 8px;
+  margin-right: 15px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.hero-buttons a:hover {
+  background: #f0f0f0;
+}
+
+/* ===== FEATURES ===== */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 30px;
+  padding: 50px;
+}
+
+.feature-box {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: transform 0.3s;
+}
+
+.feature-box:hover {
+  transform: translateY(-10px);
+}
+
+.feature-box h3 {
+  margin-bottom: 15px;
+  color: #007bff;
+}
+
+.feature-box p {
+  font-size: 14px;
+  color: #555;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  background: #222;
+  color: white;
+  text-align: center;
+  padding: 20px 0;
+}
+
+footer a {
+  color: #00c6ff;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width: 900px) {
+  .hero {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .hero-buttons a {
+    margin-bottom: 15px;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="logo">Cotton Invest</div>
+  <div>
+    <a href="/login">Login</a>
+    <a href="/register">Register</a>
+    <a href="/dashboard">Dashboard</a>
+  </div>
+</nav>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <div class="hero-text">
+    <h1>Grow Your Cotton Investment Portfolio</h1>
+    <p>Invest smartly, track your profits, and manage your funds seamlessly with Cotton Investment Platform.</p>
+    <div class="hero-buttons">
+      <a href="/register">Start Investing</a>
+      <a href="/login">Login</a>
+    </div>
+  </div>
+  <div class="hero-image">
+    <!-- Placeholder for illustration -->
+    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="300" alt="Invest Illustration">
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features">
+  <div class="feature-box">
+    <h3>Secure Deposits</h3>
+    <p>All investments are securely stored and tracked in real-time.</p>
+  </div>
+  <div class="feature-box">
+    <h3>Fast Withdrawals</h3>
+    <p>Withdraw your profits easily with instant processing.</p>
+  </div>
+  <div class="feature-box">
+    <h3>Investment Plans</h3>
+    <p>Choose from multiple plans tailored to your goals.</p>
+  </div>
+  <div class="feature-box">
+    <h3>24/7 Support</h3>
+    <p>Our customer service is available via Telegram and email anytime.</p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 Cotton Investment. All rights reserved.</p>
+  <p>📧 <a href="mailto:servicecenteragriculturalfoundation@gmail.com">servicecenteragriculturalfoundation@gmail.com</a> | 
+     📲 <a href="https://t.me/Afoundationservicecenter" target="_blank">Telegram Support</a>
+  </p>
+</footer>
+
+</body>
+</html>

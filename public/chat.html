@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite Live Support</title>
+
+<style>
+body{
+    margin:0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:white;
+}
+
+.chat-box{
+    width:420px;
+    height:600px;
+    background:#0b1118;
+    border-radius:15px;
+    box-shadow:0 0 25px rgba(0,0,0,0.6);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+.chat-header{
+    background:linear-gradient(90deg,gold,#ffcc00);
+    color:black;
+    padding:15px;
+    font-weight:bold;
+    text-align:center;
+    font-size:18px;
+}
+
+.chat-messages{
+    flex:1;
+    padding:15px;
+    overflow-y:auto;
+}
+
+.message{
+    padding:10px 14px;
+    margin:8px 0;
+    border-radius:12px;
+    max-width:75%;
+}
+
+.user{
+    background:gold;
+    color:black;
+    margin-left:auto;
+}
+
+.admin{
+    background:#1f2a36;
+}
+
+.chat-input{
+    display:flex;
+    border-top:1px solid #333;
+}
+
+.chat-input input{
+    flex:1;
+    padding:15px;
+    border:none;
+    outline:none;
+    background:#0b1118;
+    color:white;
+    font-size:15px;
+}
+
+.chat-input button{
+    padding:15px 25px;
+    border:none;
+    background:gold;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.chat-input button:hover{
+    background:#ffcc00;
+}
+</style>
+</head>
+
+<body>
+
+<div class="chat-box">
+
+<div class="chat-header">
+💬 Elite Live Support
+</div>
+
+<div class="chat-messages" id="messages"></div>
+
+<form class="chat-input" id="form">
+<input id="input" placeholder="Type message..." autocomplete="off">
+<button>Send</button>
+</form>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const form = document.getElementById('form');
+const input = document.getElementById('input');
+const messages = document.getElementById('messages');
+
+form.addEventListener('submit', e=>{
+    e.preventDefault();
+    if(input.value){
+        socket.emit('chat message', input.value);
+
+        // show own message
+        const div = document.createElement('div');
+        div.className = "message user";
+        div.textContent = input.value;
+        messages.appendChild(div);
+
+        input.value="";
+        messages.scrollTop = messages.scrollHeight;
+    }
+});
+
+socket.on('chat message', msg=>{
+    const div = document.createElement('div');
+    div.className = "message admin";
+    div.textContent = msg;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+});
+</script>
+
+</body>
+</html>

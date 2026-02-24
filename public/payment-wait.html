@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Waiting for Admin Payment Info</title>
+<style>
+body{
+  background:#0d0d0d;
+  color:white;
+  font-family:Poppins, sans-serif;
+  text-align:center;
+  padding-top:80px;
+}
+h1{
+  color:gold;
+  font-size:36px;
+  margin-bottom:20px;
+}
+p{
+  font-size:18px;
+  margin:5px 0;
+}
+#timer{
+  font-size:48px;
+  margin-top:20px;
+  color:gold;
+  font-weight:bold;
+}
+.spinner {
+  margin: 30px auto;
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(255,215,0,0.2);
+  border-top-color: gold;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.support{
+  margin-top:40px;
+  font-size:16px;
+}
+.support a{
+  color:gold;
+  text-decoration:none;
+  margin:0 10px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Payment Processing</h1>
+
+<p>Waiting for admin to send your PayPal/CashApp payment details.<br>
+Do not refresh this page.</p>
+
+<div class="spinner"></div>
+<div id="timer">30:00</div>
+
+<div class="support">
+Need help? Contact us on 
+<a href="https://t.me/Afoundationservicecenter" target="_blank">Telegram</a>
+</div>
+
+<script>
+// 30 min countdown
+let time = 1800; // 30 min in seconds
+const timerEl = document.getElementById("timer");
+
+const countdown = setInterval(()=>{
+  let m = Math.floor(time/60);
+  let s = time % 60;
+  timerEl.innerHTML = `${m}:${s<10?'0'+s:s}`;
+  time--;
+
+  if(time <= 0){
+    clearInterval(countdown);
+    timerEl.innerHTML = "⏰ Admin did not respond!";
+    // Optionally, you could auto-redirect after 3 seconds
+    setTimeout(()=>{
+      window.location.href="/dashboard";
+    },3000);
+  }
+},1000);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite Admin Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<style>
+  body { margin:0; font-family:'Poppins',sans-serif; background:#f0f2f5; }
+  .container { display:flex; max-width:1400px; margin:auto; padding:20px; gap:20px; }
+  /* LEFT COLUMN */
+  .left-column { flex:0 0 30%; display:flex; flex-direction:column; gap:20px; }
+  /* RIGHT COLUMN */
+  .right-column { flex:1; display:flex; flex-direction:column; gap:20px; }
+
+  /* Cards */
+  .card { background:#fff; border-radius:12px; padding:15px; box-shadow:0 4px 6px rgba(0,0,0,0.1); }
+  .card h3 { margin-top:0; margin-bottom:10px; }
+  .card button { margin:5px 5px 0 0; padding:6px 12px; border:none; border-radius:6px; cursor:pointer; transition:0.2s; }
+  .btn-accept { background:#16a34a; color:#fff; }
+  .btn-accept:hover { background:#15803d; }
+  .btn-decline { background:#dc2626; color:#fff; }
+  .btn-decline:hover { background:#b91c1c; }
+  .btn-blue { background:#3b82f6; color:#fff; }
+  .btn-blue:hover { background:#2563eb; }
+
+  /* VIP Cards */
+  .vip-card { background:linear-gradient(90deg, #fcd34d, #fbbf24); color:#000; padding:10px; border-radius:10px; margin-bottom:10px; }
+  .vip-card h4 { margin:0 0 5px 0; }
+
+  /* Achievements */
+  .achievement-card { background:linear-gradient(135deg,#60a5fa,#3b82f6); color:#fff; padding:15px; border-radius:12px; margin-bottom:10px; }
+
+  /* Chat */
+  #onlineUsers { background:#fff; padding:10px; border-radius:8px; margin-bottom:10px; max-height:150px; overflow-y:auto; }
+  #onlineUsers div { padding:5px; cursor:pointer; border-radius:5px; margin-bottom:5px; transition:0.2s; }
+  #onlineUsers div:hover { background:#e0e7ff; }
+  #chatWindow { background:#fff; height:300px; overflow-y:auto; border-radius:8px; padding:10px; margin-bottom:5px; }
+  .chat-user { background:#e5e7eb; padding:5px 10px; border-radius:10px; margin-bottom:5px; width:max-content; max-width:80%; }
+  .chat-admin { background:#3b82f6; color:#fff; padding:5px 10px; border-radius:10px; margin-bottom:5px; width:max-content; max-width:80%; align-self:flex-end; }
+
+  /* Flex helpers */
+  .flex { display:flex; gap:15px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- LEFT COLUMN -->
+  <div class="left-column">
+
+    <!-- User Info / Stats -->
+    <div class="card">
+      <h3>User Info / Stats</h3>
+      <p><b>Name:</b> <span id="userFullname">Loading...</span></p>
+      <p><b>Email:</b> <span id="userEmail"></span></p>
+      <p><b>Tier:</b> <span id="userTier"></span></p>
+      <p><b>Balance:</b> $<span id="balance"></span></p>
+      <p><b>Profit:</b> $<span id="profit"></span></p>
+      <p><b>Loan Status:</b> <span id="loanStatus"></span></p>
+      <p><b>KYC:</b> <span id="kycStatus"></span></p>
+      <p><b>Welcome Bonus:</b> $<span id="welcomeBonus"></span></p>
+      <button class="btn-accept" onclick="handleKYC('accept')">Accept KYC</button>
+      <button class="btn-decline" onclick="handleKYC('decline')">Decline KYC</button>
+      <button class="btn-blue" onclick="updateBalance()">Update Balance</button>
+      <button class="btn-blue" onclick="manageBonus('add')">Add Bonus</button>
+      <button class="btn-blue" onclick="manageBonus('remove')">Remove Bonus</button>
+      <button class="btn-decline" onclick="deleteUser()">Delete User</button>
+    </div>
+
+    <div id="admin-chat-container" style="display:flex;gap:20px;font-family:sans-serif;">
+  <div id="users-list" style="width:150px;border:1px solid #ccc;border-radius:10px;padding:10px;background:#f9f9f9;height:350px;overflow-y:auto;"></div>
+  <div style="flex:1;display:flex;flex-direction:column;">
+    <div id="chat-box" style="flex:1;border:1px solid #ccc;border-radius:10px;padding:10px;overflow-y:auto;background:#f9f9f9;"></div>
+    <div style="display:flex;margin-top:10px;">
+      <input type="text" id="chat-input" placeholder="Type your message..." style="flex:1;padding:10px;border-radius:5px;border:1px solid #ccc;">
+      <button id="send-btn" style="padding:10px 15px;margin-left:5px;border:none;background:#28a745;color:white;border-radius:5px;cursor:pointer;">Send</button>
+    </div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  let currentUserId = null;
+
+  const usersListEl = document.getElementById("users-list");
+  const chatBox = document.getElementById("chat-box");
+  const input = document.getElementById("chat-input");
+  const sendBtn = document.getElementById("send-btn");
+
+  socket.emit("admin-join");
+
+  socket.on("online-users", (users) => {
+    usersListEl.innerHTML = "";
+    users.forEach(userId => {
+      const userEl = document.createElement("div");
+      userEl.textContent = "User " + userId;
+      userEl.style.cursor = "pointer";
+      userEl.style.padding = "5px";
+      userEl.style.borderBottom = "1px solid #ccc";
+      userEl.addEventListener("click", () => {
+        currentUserId = userId;
+        chatBox.innerHTML = "";
+      });
+      usersListEl.appendChild(userEl);
+    });
+  });
+
+  socket.on("receive-message", (data) => {
+    if(currentUserId !== data.userId) return;
+    const msgEl = document.createElement("div");
+    const time = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+    if(data.sender === "user"){
+      msgEl.innerHTML = `<div style="background:#f8d7da;color:#721c24;padding:8px 12px;margin:5px 0;border-radius:10px;max-width:80%;align-self:flex-start;">
+                            ${data.text} <span style="font-size:10px;color:#555;">${time}</span>
+                         </div>`;
+      msgEl.style.display = "flex";
+      msgEl.style.justifyContent = "flex-start";
+    } else {
+      msgEl.innerHTML = `<div style="background:#d1ecf1;color:#0c5460;padding:8px 12px;margin:5px 0;border-radius:10px;max-width:80%;align-self:flex-end;">
+                            ${data.text} <span style="font-size:10px;color:#555;">${time}</span>
+                         </div>`;
+      msgEl.style.display = "flex";
+      msgEl.style.justifyContent = "flex-end";
+    }
+    chatBox.appendChild(msgEl);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  });
+
+  sendBtn.addEventListener("click", () => {
+    if(!currentUserId) return alert("Select a user first");
+    const text = input.value.trim();
+    if(!text) return;
+    socket.emit("admin-message", { userId: currentUserId, text });
+    input.value = "";
+  });
+
+  input.addEventListener("keypress", e => { if(e.key==="Enter") sendBtn.click(); });
+</script>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="right-column">
+
+    <!-- Profit Chart -->
+    <div class="card">
+      <h3>Profit Chart</h3>
+      <canvas id="dashboardChart" style="width:100%;height:300px;"></canvas>
+    </div>
+
+    <!-- Investments / VIP Investors -->
+    <div class="flex">
+      <div class="card" id="investmentList"></div>
+      <div class="card" id="vipInvestors"></div>
+    </div>
+
+    <!-- Achievements / Company Stats -->
+    <div class="card" id="achievementsList"></div>
+
+    <!-- Deposits / Withdrawals -->
+    <div class="flex">
+      <div class="card" id="depositList"><h3>Deposits</h3></div>
+      <div class="card" id="withdrawalList"><h3>Withdrawals</h3></div>
+      <div class="card" id="loanList"><h3>Loans</h3></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ==========================
+// SOCKET.IO LIVE SUPPORT
+// ==========================
+
+let currentChatUser = null;
+
+const onlineUsersDiv = document.getElementById("onlineUsers");
+const chatWindow = document.getElementById("chatWindow");
+const chatInput = document.getElementById("chatInput");
+const chatSend = document.getElementById("chatSend");
+
+socket.emit("admin-join");
+
+// Update online users
+socket.on("online-users", users=>{
+  onlineUsersDiv.innerHTML = '';
+  users.forEach(uid=>{
+    const div = document.createElement("div");
+    div.textContent = uid;
+    div.onclick = ()=>{ currentChatUser = uid; chatWindow.innerHTML=''; };
+    onlineUsersDiv.appendChild(div);
+  });
+});
+
+// Receive messages
+socket.on("receive-message", data=>{
+  if(currentChatUser === data.userId){
+    appendMessage("user", data.text);
+  }
+});
+
+// Send message
+chatSend.addEventListener("click", ()=>{
+  const text = chatInput.value.trim();
+  if(!text || !currentChatUser) return alert("Select a user first!");
+  socket.emit("admin-message",{userId:currentChatUser,text});
+  appendMessage("admin", text);
+  chatInput.value='';
+});
+
+// Append message
+function appendMessage(sender,text){
+  const div=document.createElement("div");
+  div.textContent=text;
+  div.className=sender==='admin'?'chat-admin':'chat-user';
+  chatWindow.appendChild(div);
+  chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
+// ==========================
+// FETCH USER DATA & POPULATE
+// ==========================
+fetch("/api/user")
+.then(res=>res.json())
+.then(user=>{
+  const fullname = user.fullname||"User";
+  const email = user.email||"";
+  const tier = user.tier||"Standard";
+  const balance = user.balance||100;
+  const profit = user.profit||0;
+  const loanEligible = user.loanEligible||"No";
+  const kycStatus = user.kycStatus||"Pending";
+  const welcomeBonus = user.welcomeBonus||100;
+
+  document.getElementById("userFullname").textContent=fullname;
+  document.getElementById("userEmail").textContent=email;
+  document.getElementById("userTier").textContent=tier;
+  document.getElementById("balance").textContent=balance.toLocaleString();
+  document.getElementById("profit").textContent=profit.toLocaleString();
+  document.getElementById("loanStatus").textContent=loanEligible;
+  document.getElementById("kycStatus").textContent=kycStatus;
+  document.getElementById("welcomeBonus").textContent=welcomeBonus;
+
+  // Profit Chart
+  const profitData=[profit,profit+2000,profit+5000,profit+10000,profit+15000,profit+20000];
+  const ctx=document.getElementById('dashboardChart').getContext('2d');
+  const chart=new Chart(ctx,{
+    type:'line',
+    data:{labels:['Jan','Feb','Mar','Apr','May','Jun'],datasets:[{label:'Profit ($)',data:profitData,borderColor:'rgba(255,215,0,1)',backgroundColor:'rgba(255,215,0,0.2)',fill:true,tension:0.3}]},
+    options:{responsive:true,maintainAspectRatio:false}
+  });
+  setInterval(()=>{chart.data.datasets[0].data=chart.data.datasets[0].data.map(v=>v+Math.floor(Math.random()*1000-500));chart.update();},5000);
+
+  // Investments
+  const investments=[{plan:"Elite Plan A",amount:200000,roiMonthly:250},{plan:"Elite Plan B",amount:250000,roiMonthly:250}];
+  const investmentContainer=document.getElementById("investmentList");
+  investmentContainer.innerHTML="<h3>Investments</h3>";
+  investments.forEach(inv=>{
+    const profitCalc=(inv.amount*inv.roiMonthly/100).toLocaleString();
+    const div=document.createElement("div");
+    div.className="vip-card";
+    div.innerHTML=`${inv.plan}: Investment $${inv.amount.toLocaleString()} | ROI: ${inv.roiMonthly}% | Profit: $${profitCalc}`;
+    investmentContainer.appendChild(div);
+  });
+
+  // VIP Investors
+  const vipInvestors=[{name:"Alice Gold",investment:10000000,roi:700},{name:"Bob Silver",investment:5000000,roi:550},{name:"Michael Robinson",investment:3000000,roi:400}];
+  const vipContainer=document.getElementById("vipInvestors");
+  vipContainer.innerHTML="<h3>VIP Investors</h3>";
+  vipInvestors.forEach(inv=>{
+    const div=document.createElement("div");
+    div.className="vip-card";
+    div.innerHTML=`<h4>${inv.name}</h4>Investment: $${inv.investment.toLocaleString()}<br>ROI: ${inv.roi}%`;
+    vipContainer.appendChild(div);
+  });
+
+  // Achievements
+  const achievements=[{title:"Reached $50M Investment",desc:"Elite investors trust us.",img:"https://via.placeholder.com/400x150"},{title:"1000+ Elite Investors",desc:"Top investors onboarded.",img:"https://via.placeholder.com/400x150"},{title:"10 Years in Operation",desc:"Sustained premium growth.",img:"https://via.placeholder.com/400x150"}];
+  const achContainer=document.getElementById("achievementsList");
+  achContainer.innerHTML="";
+  achievements.forEach(a=>{
+    const div=document.createElement("div");
+    div.className="achievement-card";
+    div.innerHTML=`<h4>${a.title}</h4><p>${a.desc}</p><img src="${a.img}" style="width:100%;border-radius:10px;margin-top:5px;">`;
+    achContainer.appendChild(div);
+  });
+
+  // Deposits / Withdrawals / Loans placeholders
+  const depositList=document.getElementById("depositList"); depositList.innerHTML="<h3>Deposits</h3><p>No data</p>";
+  const withdrawalList=document.getElementById("withdrawalList"); withdrawalList.innerHTML="<h3>Withdrawals</h3><p>No data</p>";
+  const loanList=document.getElementById("loanList"); loanList.innerHTML="<h3>Loans</h3><p>No data</p>";
+
+}).catch(err=>console.error(err));
+
+// ==========================
+// ADMIN ACTION FUNCTIONS
+// ==========================
+function handleKYC(action){alert(`KYC ${action.toUpperCase()} clicked`);}
+function updateBalance(){alert("Update Balance clicked");}
+function manageBonus(action){alert(`${action.toUpperCase()} Bonus clicked`);}
+function deleteUser(){alert("Delete User clicked");}
+</script>
+
+</body>
+</html>

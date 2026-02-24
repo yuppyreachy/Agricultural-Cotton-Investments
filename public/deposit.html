@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Elite Funding Desk</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  background:linear-gradient(135deg,#050505,#0d0d0d,#000);
+  font-family:Poppins;
+  color:white;
+}
+
+.header{
+  background:black;
+  padding:20px;
+  text-align:center;
+  border-bottom:1px solid gold;
+  box-shadow:0 0 25px rgba(255,215,0,0.3);
+}
+.header h1{
+  color:gold;
+  letter-spacing:2px;
+}
+
+.container{
+  width:95%;
+  max-width:1200px;
+  margin:40px auto;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+  gap:30px;
+}
+
+.card{
+  background:rgba(20,20,20,0.95);
+  padding:30px;
+  border-radius:20px;
+  box-shadow:0 0 35px rgba(255,215,0,0.15);
+  position:relative;
+  overflow:hidden;
+}
+
+.card:before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:3px;
+  background:linear-gradient(90deg,gold,transparent);
+}
+
+h2{
+  color:gold;
+  margin-bottom:15px;
+}
+
+label{
+  display:block;
+  margin-top:15px;
+  font-size:14px;
+  color:#ccc;
+}
+
+input,select{
+  width:100%;
+  padding:14px;
+  margin-top:6px;
+  border-radius:10px;
+  border:none;
+  background:#0d0d0d;
+  color:white;
+  font-size:15px;
+  outline:none;
+}
+
+input:focus,select:focus{
+  box-shadow:0 0 10px gold;
+}
+
+button{
+  margin-top:20px;
+  width:100%;
+  padding:15px;
+  border:none;
+  border-radius:12px;
+  background:linear-gradient(45deg,gold,#ffcc00);
+  font-weight:bold;
+  font-size:16px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+button:hover{
+  transform:scale(1.03);
+  box-shadow:0 0 20px gold;
+}
+
+.wallet{
+  background:#000;
+  padding:15px;
+  border-radius:12px;
+  margin:15px 0;
+  font-size:14px;
+  border:1px solid gold;
+}
+
+.note{
+  font-size:13px;
+  color:#aaa;
+  margin-top:10px;
+}
+
+.status{
+  margin-top:20px;
+  padding:15px;
+  border-radius:12px;
+  background:#000;
+  border:1px solid gold;
+  display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>💰 ELITE FUNDING DESK</h1>
+</div>
+
+<div class="container">
+<div class="grid">
+
+<!-- CRYPTO -->
+<div class="card">
+<h2>🪙 Crypto/BCT Deposit</h2>
+<h2>🪙 BITCOIN ONLY</h2>
+
+<div class="wallet-container" style="margin-top:10px;">
+    <span id="walletAddress">0x1234ABCD5678EFGH9012IJKL3456MNOP</span>
+    <button id="copyWallet" style="margin-left:10px;padding:5px 10px;border:none;border-radius:5px;background:gold;color:#000;cursor:pointer;">Copy</button>
+</div>
+
+<form onsubmit="return cryptoDeposit()">
+<label>Enter Amount ($)</label>
+<input type="number" id="cryptoAmount" placeholder="Minimum 1000" required>
+
+<label>Upload Proof (optional)</label>
+<input type="file">
+
+<button type="submit">I HAVE SENT PAYMENT</button>
+</form>
+
+<p class="note">
+After sending crypto, click the button above.<br>
+Blockchain confirmation required.
+</p>
+</div>
+
+
+<!-- MANUAL -->
+<div class="card">
+<h2>🏦 PayPal / CashApp / Bank</h2>
+
+<form onsubmit="return manualDeposit()">
+<label>Enter Amount ($)</label>
+<input type="number" id="manualAmount" placeholder="Minimum 1000" required>
+
+<label>Select Method</label>
+<select id="method">
+<option value="">Select</option>
+<option>PayPal</option>
+<option>CashApp</option>
+<option>Bank</option>
+</select>
+
+<button type="submit">Submit Deposit Request</button>
+</form>
+
+<div class="status" id="statusBox"></div>
+
+<p class="note">
+Admin will send payment details after request.<br>
+Do not refresh after submitting.
+</p>
+</div>
+
+</div>
+</div>
+
+<script>
+// ===== CRYPTO =====
+function cryptoDeposit(){
+ const amount = document.getElementById("cryptoAmount").value;
+
+ if(amount < 1000){
+  alert("Minimum crypto deposit is $1000");
+  return false;
+ }
+
+ alert("Crypto payment detected. Waiting for confirmation...");
+
+ setTimeout(()=>{
+   window.location.href="/crypto-pending.html";
+ },1500);
+
+ return false;
+}
+
+
+// ===== MANUAL =====
+function manualDeposit(){
+ const amount = document.getElementById("manualAmount").value;
+ const method = document.getElementById("method").value;
+
+ if(!amount || !method){
+  alert("Enter amount and select method");
+  return false;
+ }
+
+ if(amount < 1000){
+  alert("Minimum deposit is $1000");
+  return false;
+ }
+
+ alert("Deposit request sent!");
+
+ if(method==="PayPal" || method==="CashApp"){
+   window.location.href="/payment-wait.html";
+ }
+ else if(method==="Bank"){
+   window.location.href="/bank-wait.html";
+ }
+ else{
+   window.location.href="/dashboard";
+ }
+
+ return false;
+}
+
+const copyBtn = document.getElementById("copyWallet");
+const walletText = document.getElementById("walletAddress");
+
+copyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(walletText.textContent).then(() => {
+        copyBtn.textContent = "Copied! ✅";
+        setTimeout(() => { copyBtn.textContent = "Copy"; }, 2000);
+    }).catch(err => {
+        console.error("Failed to copy:", err);
+    });
+});
+
+</script>
+<tbody>
+<% deposits.forEach(d => { %>
+<tr>
+<td><%= new Date(d.created_at).toDateString() %></td>
+<td><%= d.method %></td>
+<td>$<%= d.amount %></td>
+<td>
+<span class="status <%= d.status.toLowerCase() %>">
+<%= d.status %>
+</span>
+</td>
+</tr>
+<% }) %>
+</tbody>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Logging Out...</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg,#020617,#0a0f2c);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.box{
+    background:#0f172a;
+    padding:50px;
+    border-radius:15px;
+    text-align:center;
+    box-shadow:0 0 40px rgba(0,0,0,0.7);
+    max-width:420px;
+    width:90%;
+}
+
+h1{
+    color:#00ffd5;
+    margin-bottom:10px;
+}
+
+p{
+    color:#ccc;
+    font-size:15px;
+}
+
+.loader{
+    margin:25px auto;
+    border:5px solid #111;
+    border-top:5px solid #00ffd5;
+    border-radius:50%;
+    width:45px;
+    height:45px;
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    0%{transform:rotate(0deg);}
+    100%{transform:rotate(360deg);}
+}
+
+a{
+    display:inline-block;
+    margin-top:20px;
+    padding:12px 20px;
+    background:#00ffd5;
+    color:black;
+    border-radius:8px;
+    text-decoration:none;
+    font-weight:bold;
+}
+
+a:hover{
+    background:#00c9a7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+<h1>🔐 Logging Out</h1>
+<p>Your session is being securely closed...</p>
+
+<div class="loader"></div>
+
+<p>You will be redirected to login page</p>
+
+<a href="/login">Login Again</a>
+</div>
+
+<script>
+// redirect after logout
+setTimeout(()=>{
+    window.location.href="/login";
+},4000);
+</script>
+
+</body>
+</html>
