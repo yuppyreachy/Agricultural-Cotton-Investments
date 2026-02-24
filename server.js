@@ -1,8 +1,12 @@
 require("dotenv").config();
 const express = require("express");
+const app = express();
 const nodemailer = require("nodemailer");
 const path = require("path");
-const http = require("http");
+const http = require('http');
+const io = require('socket.io')(http);
+const dotenv = require('dotenv');
+dotenv.config();
 const { Server } = require("socket.io");
 const bcrypt = require("bcrypt");
 const multer = require("multer");
@@ -10,12 +14,29 @@ const session = require("express-session");
 const axios = require("axios");
 const fetch = require("node-fetch");
 const adminPass = process.env.ADMIN_PASS;
-const adminRoutes = require("./routes/adminroutes"); 
+const adminRoutes = require('./routes/adminroutes');
 const sendMail = require("./routes/mailer");
 const contactRoute = require('./routes/contactRoutes');
-const app = express();
-const server = http.createServer(app);
 
+const server = http.createServer(app);
+const sgMail = require("@sendgrid/mail");
+
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+async function sendEmail(to, subject, message) {
+  const msg = {
+    to,
+    from: "your_verified_email@gmail.com", // MUST verify in SendGrid
+    subject,
+    text: message,
+    html: `<p>${message}</p>`,
+  };
+
+  await sgMail.send(msg);
+}
+
+module.exports = sendEmail;
 
 const db = require("./db");
 const authRoutes = require("./routes/authRoutes");
@@ -1067,69 +1088,50 @@ app.post("/submit-kyc",(req,res)=>{
  res.redirect("/kyc-confirmation.html");
  
 });
-const io = require("socket.io")(server);
+// ---------------- SOCKET.IO ----------------
+const adminSockets = new Set();
+const userSockets = new Map(); // userId => socket.id
 
-let onlineUsers = new Map(); // userId -> socketId
-let adminSocket = null;
+io.on('connection', socket => {
+    
+    // ---------------- USER ----------------
+    socket.on('user-join', userId => {
+        userSockets.set(userId, socket.id);
+        if (adminSockets.size > 0) socket.emit('admin-online');
+        else socket.emit('admin-offline');
+    });
 
-io.on("connection", (socket) => {
-  console.log("New connection", socket.id);
+    socket.on('user-message', ({ userId, text }) => {
+        // Send to all admins
+        adminSockets.forEach(adminId => {
+            io.to(adminId).emit('receive-message', { sender: 'user', userId, text });
+        });
 
-  // User joins
-  socket.on("user-join", (userId) => {
-    if(!userId) return;
-    onlineUsers.set(userId, socket.id);
-    socket.userId = userId;
+        // Auto-reply if no admin online
+        if (adminSockets.size === 0) {
+            const userSocketId = userSockets.get(userId);
+            if (userSocketId) io.to(userSocketId).emit('receive-message', { sender: 'system', text: 'Admin is offline. Your message has been received.' });
+            // Optional: send email via Resend
+            // sendEmail(userEmail, "Admin offline ⏳", `<p>Your message has been received. Admin will reply when online.</p>`);
+        }
+    });
 
-    // Notify admin
-    if(adminSocket) io.to(adminSocket).emit("online-users", Array.from(onlineUsers.keys()));
+    // ---------------- ADMIN ----------------
+    socket.on('admin-join', () => {
+        adminSockets.add(socket.id);
+    });
 
-    // Notify user if admin online
-    if(adminSocket) socket.emit("admin-online");
-  });
+    socket.on('admin-message', ({ userId, text }) => {
+        const userSocketId = userSockets.get(userId);
+        if (userSocketId) io.to(userSocketId).emit('receive-message', { sender: 'admin', text });
+    });
 
-  // Admin joins
-  socket.on("admin-join", () => {
-    adminSocket = socket.id;
-    console.log("Admin connected");
-
-    // Notify all users admin is online
-    onlineUsers.forEach(sid => io.to(sid).emit("admin-online"));
-    io.to(adminSocket).emit("online-users", Array.from(onlineUsers.keys()));
-  });
-
-  // User sends message
-  socket.on("user-message", (data) => {
-    if(!data?.userId || !data?.text) return;
-
-    if(adminSocket){
-      io.to(adminSocket).emit("receive-message", { ...data, sender:"user", time:new Date() });
-    } else {
-      // AUTO-RESPONSE if admin offline
-      socket.emit("receive-message", {
-        sender: "system",
-        text: "⚠️ Admin is currently offline. Your message will be replied to soon.",
-        time: new Date()
-      });
-    }
-  });
-
-  // Admin sends message
-  socket.on("admin-message", (data) => {
-    const userSocket = onlineUsers.get(data.userId);
-    if(userSocket){
-      io.to(userSocket).emit("receive-message", { text: data.text, sender:"admin", time: new Date() });
-    }
-  });
-
-  // Disconnect
-  socket.on("disconnect", ()=>{
-    if(socket.userId) onlineUsers.delete(socket.userId);
-    if(adminSocket === socket.id){
-      adminSocket = null;
-      onlineUsers.forEach(sid => io.to(sid).emit("admin-offline"));
-    }
-  });
+    socket.on('disconnect', () => {
+        adminSockets.delete(socket.id);
+        userSockets.forEach((id, userId) => {
+            if (id === socket.id) userSockets.delete(userId);
+        });
+    });
 });
 
 
