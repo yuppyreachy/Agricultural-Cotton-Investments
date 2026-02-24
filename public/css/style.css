@@ -1,0 +1,111 @@
+/* =========================
+   RESPONSIVE / MOBILE
+========================= */
+@media (max-width: 1024px) {
+  .sidebar {
+    width: 180px;
+  }
+  .main {
+    padding: 15px;
+  }
+  .grid-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 10px;
+  }
+  .sidebar ul {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .sidebar ul li {
+    margin: 10px;
+  }
+
+  .main {
+    padding: 10px;
+  }
+
+  /* Grid Lists become single column */
+  .grid-list {
+    grid-template-columns: 1fr;
+  }
+
+  /* VIP Grid stacking */
+  .vip-grid {
+    flex-direction: column;
+  }
+
+  /* Plans / Cards */
+  .plans, .testimonials {
+    flex-direction: column;
+  }
+
+  .plan, .vip-card, .card {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  /* Hero adjustments */
+  .hero h1 {
+    font-size: 28px;
+  }
+
+  /* Auth Pages adjustments */
+  .auth-container {
+    flex-direction: column;
+    width: 95%;
+  }
+  .auth-left, .auth-right {
+    padding: 25px;
+    text-align: center;
+  }
+
+  /* Popups scale down */
+  #welcomeBonusPopup, #eliteBonusPopup {
+    width: 90%;
+    right: 5%;
+    padding: 15px;
+    font-size: 16px;
+  }
+
+  /* Chart container full width */
+  .chart-container {
+    width: 100%;
+    margin: 15px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 22px;
+  }
+  .btn, .register-btn, .auth-right button {
+    font-size: 14px;
+    padding: 8px 15px;
+  }
+  .sidebar ul li a {
+    font-size: 14px;
+  }
+  .card h3, .grid-item h4 {
+    font-size: 14px;
+  }
+  .grid-item p {
+    font-size: 12px;
+  }
+  .chart-container h3 {
+    font-size: 16px;
+  }
+}
