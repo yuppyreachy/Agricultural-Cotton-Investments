@@ -1,3 +1,4 @@
+// adminRoutes.js
 const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
@@ -32,18 +33,15 @@ function isAdmin(req, res, next) {
 }
 
 /* ===============================
-   LOGIN
+   LOGIN / LOGOUT
 ================================ */
-router.get("/login", (req, res) => {
-  res.render("admin/login");
-});
+router.get("/login", (req, res) => res.render("admin/login"));
 
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   try {
     const admin = await dbGet("SELECT * FROM admins WHERE email = ?", [email]);
     if (!admin) return res.send("Invalid login ❌");
-
     const match = await bcrypt.compare(password, admin.password);
     if (!match) return res.send("Invalid login ❌");
 
@@ -55,12 +53,7 @@ router.post("/login", async (req, res) => {
   }
 });
 
-/* ===============================
-   LOGOUT
-================================ */
-router.get("/logout", (req, res) => {
-  req.session.destroy(() => res.redirect("/admin/login"));
-});
+router.get("/logout", (req, res) => req.session.destroy(() => res.redirect("/admin/login")));
 
 /* ===============================
    DASHBOARD
@@ -71,12 +64,7 @@ router.get("/dashboard", isAdmin, async (req, res) => {
     const pendingDeposits = await dbAll(
       "SELECT * FROM deposits WHERE status='pending' ORDER BY created_at DESC"
     );
-
-    res.render("admin/dashboard", {
-      admin: req.session.admin,
-      users,
-      pendingDeposits
-    });
+    res.render("admin/dashboard", { admin: req.session.admin, users, pendingDeposits });
   } catch (err) {
     console.error(err);
     res.send("Dashboard error ❌");
@@ -89,12 +77,8 @@ router.get("/dashboard", isAdmin, async (req, res) => {
 router.get("/stats", isAdmin, async (req, res) => {
   try {
     const users = await dbAll("SELECT * FROM users");
-    const deposits = await dbAll(
-      "SELECT * FROM deposits WHERE status='approved'"
-    );
-    const withdrawals = await dbAll(
-      "SELECT * FROM withdrawals WHERE status='approved'"
-    );
+    const deposits = await dbAll("SELECT * FROM deposits WHERE status='approved'");
+    const withdrawals = await dbAll("SELECT * FROM withdrawals WHERE status='approved'");
 
     const totalDeposits = deposits.reduce((s, d) => s + d.amount, 0);
     const totalWithdrawals = withdrawals.reduce((s, w) => s + w.amount, 0);
@@ -103,7 +87,7 @@ router.get("/stats", isAdmin, async (req, res) => {
       totalUsers: users.length,
       totalDeposits,
       totalWithdrawals,
-      revenue: totalDeposits - totalWithdrawals
+      revenue: totalDeposits - totalWithdrawals,
     });
   } catch (err) {
     res.status(500).json({ error: "Stats failed" });
@@ -132,6 +116,13 @@ async function processRequest(table, id, action, affectBalance = false, sign = 1
         "UPDATE users SET balance = balance + ? WHERE id=?",
         [request.amount * sign, request.user_id]
       );
+
+      // Emit new balance to user if online
+      if (global.io && global.io.userSockets.has(request.user_id)) {
+        const socketId = global.io.userSockets.get(request.user_id);
+        const user = await dbGet("SELECT balance FROM users WHERE id=?", [request.user_id]);
+        global.io.to(socketId).emit("balance-updated", { newBalance: user.balance });
+      }
     }
 
     await dbRun("COMMIT");
@@ -190,16 +181,25 @@ router.post("/balance/:id", isAdmin, async (req, res) => {
   try {
     await dbRun("UPDATE users SET balance = balance + ? WHERE id=?", [
       amount,
-      req.params.id
+      req.params.id,
     ]);
-    res.json({ success: true });
+
+    const user = await dbGet("SELECT balance FROM users WHERE id=?", [req.params.id]);
+
+    // Emit to user via Socket.io if online
+    if (global.io && global.io.userSockets.has(req.params.id)) {
+      const socketId = global.io.userSockets.get(req.params.id);
+      global.io.to(socketId).emit("balance-updated", { newBalance: user.balance });
+    }
+
+    res.json({ success: true, newBalance: user.balance });
   } catch (err) {
     res.status(500).json({ error: "Balance failed" });
   }
 });
 
 /* ===============================
-   CHAT
+   CHAT ROUTES
 ================================ */
 router.get("/chat/:userId", isAdmin, async (req, res) => {
   try {
@@ -222,6 +222,13 @@ router.post("/chat/:userId", isAdmin, async (req, res) => {
       "INSERT INTO messages (user_id,sender,message,created_at) VALUES (?, 'admin', ?, datetime('now'))",
       [req.params.userId, message]
     );
+
+    // Emit live to user if online
+    if (global.io && global.io.userSockets.has(req.params.userId)) {
+      const socketId = global.io.userSockets.get(req.params.userId);
+      global.io.to(socketId).emit("receive-message", { sender: "admin", text: message });
+    }
+
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ error: "Send failed" });
