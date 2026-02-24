@@ -1,0 +1,15 @@
+<form method="POST" action="/admin/approve-deposit/{{deposit.id}}">
+  <label>Bank Name</label>
+  <input type="text" name="bank_name" required>
+
+  <label>Account Number</label>
+  <input type="text" name="account_number" required>
+
+  <label>Account Holder</label>
+  <input type="text" name="account_holder" required>
+
+  <label>Instructions</label>
+  <textarea name="instructions" required></textarea>
+
+  <button type="submit">Approve Deposit</button>
+</form>

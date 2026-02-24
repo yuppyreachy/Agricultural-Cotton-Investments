@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Account Settings</title>
+
+<style>
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg,#020617,#0a0f2c);
+    color:white;
+    margin:0;
+}
+
+.container{
+    max-width:950px;
+    margin:40px auto;
+    background:#0f172a;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 0 40px rgba(0,0,0,0.7);
+}
+
+h1{
+    text-align:center;
+    color:#00ffd5;
+}
+
+.section{
+    background:#020617;
+    padding:20px;
+    border-radius:12px;
+    margin-top:25px;
+}
+
+label{
+    font-weight:bold;
+    display:block;
+    margin-top:15px;
+}
+
+input, select{
+    width:100%;
+    padding:12px;
+    margin-top:6px;
+    border:none;
+    border-radius:8px;
+    background:#000814;
+    color:white;
+}
+
+input[type=file]{
+    background:#000814;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:25px;
+    background:#00ffd5;
+    color:black;
+    border:none;
+    border-radius:10px;
+    font-size:17px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#00c9a7;
+}
+
+.success{
+    display:none;
+    background:#022c22;
+    color:#00ffd5;
+    padding:15px;
+    margin-top:20px;
+    border-radius:8px;
+    text-align:center;
+}
+
+.top{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.back{
+background:#00ffd5;
+color:black;
+padding:8px 15px;
+border-radius:8px;
+text-decoration:none;
+font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="top">
+<h1>⚙️ Profile & Settings</h1>
+<a href="/dashboard" class="back">← Dashboard</a>
+</div>
+
+<form id="settingsForm">
+
+<!-- PROFILE EDIT -->
+<div class="section">
+<h3>👤 Edit Profile</h3>
+
+<label>Full Name</label>
+<input type="text" placeholder="Enter full name">
+
+<label>Email</label>
+<input type="email" placeholder="Enter email">
+
+<label>Phone Number</label>
+<input type="text" placeholder="Enter phone">
+
+<label>Home Address</label>
+<input type="text" placeholder="Enter address">
+
+<label>Upload Profile Photo</label>
+<input type="file">
+</div>
+
+<!-- PASSWORD -->
+<div class="section">
+<h3>🔒 Change Password</h3>
+
+<label>Current Password</label>
+<input type="password">
+
+<label>New Password</label>
+<input type="password">
+
+<label>Confirm New Password</label>
+<input type="password">
+</div>
+
+<!-- SECURITY PIN -->
+<div class="section">
+<h3>🔐 Security PIN</h3>
+
+<label>Old PIN</label>
+<input type="password" maxlength="4">
+
+<label>New 4-digit PIN</label>
+<input type="password" maxlength="4">
+
+<label>Confirm New PIN</label>
+<input type="password" maxlength="4">
+</div>
+
+<!-- WITHDRAWAL INFO -->
+<div class="section">
+<h3>💰 Withdrawal Wallets</h3>
+
+<label>Bitcoin Wallet</label>
+<input type="text">
+
+<label>USDT Wallet</label>
+<input type="text">
+
+<label>Ethereum Wallet</label>
+<input type="text">
+
+<label>PayPal Email</label>
+<input type="email">
+
+<label>Cash App Tag</label>
+<input type="text">
+
+<label>Zelle Email</label>
+<input type="text">
+</div>
+
+<!-- NOTIFICATION -->
+<div class="section">
+<h3>🔔 Notification Settings</h3>
+
+<label>Email Notification</label>
+<select>
+<option>Enable</option>
+<option>Disable</option>
+</select>
+
+<label>Login Alert</label>
+<select>
+<option>Enable</option>
+<option>Disable</option>
+</select>
+</div>
+
+<button type="submit">Save All Changes</button>
+
+<div class="success" id="successBox">
+✅ Profile & settings updated successfully.<br><br>
+Security changes saved.<br>
+Confirmation email sent to your Gmail.<br><br>
+Redirecting to dashboard...
+</div>
+
+</form>
+</div>
+
+<script>
+document.getElementById("settingsForm").addEventListener("submit", function(e){
+e.preventDefault();
+
+document.getElementById("successBox").style.display="block";
+
+setTimeout(()=>{
+window.location.href="/dashboard";
+},3500);
+});
+</script>
+
+</body>
+</html>

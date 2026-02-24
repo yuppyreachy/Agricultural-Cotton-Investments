@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Crypto Deposit Pending</title>
+<style>
+body{
+  background:black;
+  color:white;
+  font-family:Arial, sans-serif;
+  text-align:center;
+  padding-top:80px;
+}
+h1{
+  color:gold;
+  font-size:36px;
+  margin-bottom:20px;
+}
+p{
+  font-size:18px;
+  margin:5px 0;
+}
+#count{
+  font-size:24px;
+  margin:20px 0;
+  color:gold;
+  font-weight:bold;
+}
+.support{
+  margin-top:40px;
+  font-size:16px;
+}
+.support a{
+  color:gold;
+  text-decoration:none;
+  margin:0 10px;
+}
+.spinner {
+  margin: 30px auto;
+  width: 60px;
+  height: 60px;
+  border: 6px solid rgba(255,215,0,0.2);
+  border-top-color: gold;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+
+<body>
+
+<h1>🪙 Crypto Deposit Pending</h1>
+<p>Your crypto payment has been detected.</p>
+<p>Waiting for blockchain confirmation...</p>
+
+<div class="spinner"></div>
+<div id="count">Checking status...</div>
+
+<div class="support">
+Need help? Contact us on 
+<a href="https://t.me/Afoundationservicecenter" target="_blank">Telegram</a>
+</div>
+
+<script>
+const depositId = window.location.pathname.split("/").pop();
+const countEl = document.getElementById("count");
+
+let waitingSeconds = 0;
+const interval = setInterval(async () => {
+  waitingSeconds += 5;
+
+  try {
+    const res = await fetch(`/deposit/status/${depositId}`);
+    const data = await res.json();
+
+    if(data.status === "confirmed"){
+      clearInterval(interval);
+      countEl.innerHTML = "✅ Deposit Confirmed!";
+      setTimeout(()=>window.location.href="/dashboard",2000);
+    } else if(data.status === "pending"){
+      countEl.innerHTML = `⏳ Waiting for admin confirmation... (${waitingSeconds}s elapsed)`;
+    } else if(data.status === "failed"){
+      clearInterval(interval);
+      countEl.innerHTML = "❌ Deposit Failed. Contact support.";
+    } else {
+      countEl.innerHTML = `⏳ Checking... (${waitingSeconds}s elapsed)`;
+    }
+
+  } catch(err){
+    console.error(err);
+    countEl.innerHTML = `❌ Error checking status (${waitingSeconds}s)`;
+  }
+}, 5000);
+</script>
+
+</body>
+</html>

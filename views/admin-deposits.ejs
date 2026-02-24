@@ -1,0 +1,23 @@
+<h2>Pending Deposits</h2>
+
+<table border="1" cellpadding="10">
+<tr>
+<th>User ID</th>
+<th>Amount</th>
+<th>Method</th>
+<th>Action</th>
+</tr>
+
+<% deposits.forEach(d => { %>
+<tr>
+<td><%= d.user_id %></td>
+<td>$<%= d.amount %></td>
+<td><%= d.method %></td>
+<td>
+<form action="/admin/approve-deposit/<%= d.id %>" method="POST">
+<button type="submit">Approve</button>
+</form>
+</td>
+</tr>
+<% }) %>
+</table>

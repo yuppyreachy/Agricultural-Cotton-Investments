@@ -1,0 +1,14 @@
+<h2>Live Video Verification</h2>
+
+<video id="video" autoplay></video>
+
+<script>
+navigator.mediaDevices.getUserMedia({ video: true })
+.then(stream => {
+  document.getElementById('video').srcObject = stream;
+});
+</script>
+
+<form action="/kyc/video-complete" method="POST">
+  <button type="submit">Complete Verification</button>
+</form>

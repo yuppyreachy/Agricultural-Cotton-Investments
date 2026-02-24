@@ -1,0 +1,12 @@
+<div class="container">
+  <h1>Withdrawal Submitted</h1>
+  <p>You requested $<%= amount %> via <b><%= method %></b>.</p>
+  <% if (payment_info) { %>
+    <p>Payment Info: <%= payment_info %></p>
+  <% } %>
+  <% if (crypto_address) { %>
+    <p>Crypto Wallet: <%= crypto_address %></p>
+  <% } %>
+  <p>Status: Pending admin approval</p>
+  <a href="/withdraw">Back to Withdraw</a>
+</div>

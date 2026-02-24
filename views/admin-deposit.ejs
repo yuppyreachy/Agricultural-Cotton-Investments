@@ -1,0 +1,10 @@
+<!-- admin-deposit.ejs -->
+<h2>Deposit Approval</h2>
+<p>User UID: <%= deposit.uid %></p>
+<p>Amount: $<%= deposit.amount %></p>
+
+<form action="/admin/approve-deposit/<%= deposit.id %>" method="POST">
+  <label for="bank_info">Bank Account / Payment Details:</label>
+  <textarea name="bank_info" required placeholder="Paste bank info here"></textarea>
+  <button type="submit">Approve Deposit</button>
+</form>

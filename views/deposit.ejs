@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Elite Funding Desk</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin:0;
+    font-family:Poppins, sans-serif;
+    background: linear-gradient(135deg,#050505,#0d0d0d,#000);
+    color: #fff;
+  }
+  .header {
+    background: black;
+    padding: 20px;
+    text-align: center;
+    border-bottom: 2px solid gold;
+  }
+  .header h1 { color: gold; font-size: 2em; }
+  .support {
+    margin-top: 10px;
+    font-size: 14px;
+  }
+  .support a {
+    color: gold;
+    text-decoration: none;
+    margin: 0 10px;
+  }
+  .container {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(400px,1fr));
+    gap: 30px;
+  }
+  .card {
+    background: #111;
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid gold;
+    box-shadow: 0 0 15px rgba(255,215,0,0.2);
+  }
+  .card h2 { margin-bottom: 20px; }
+  label { display: block; margin-top: 15px; font-weight: 500; }
+  input, select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: none;
+    background: #000;
+    color: white;
+    font-size: 14px;
+  }
+  button {
+    margin-top: 20px;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: gold;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  button:hover { background: #ffc107; }
+  .wallet-container {
+    background: #000;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 15px 0;
+    border: 1px solid gold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: monospace;
+  }
+  @media(max-width:480px){
+    .wallet-container { flex-direction: column; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>💰 ELITE FUNDING DESK</h1>
+  <div class="support">
+    Customer Support:
+    <a href="https://t.me/Afoundationservicecenter" target="_blank">Telegram</a> |
+    <a href="mailto:Agriculturalfoundationdeposits@gmail.com">Gmail</a>
+  </div>
+</div>
+
+<div class="container">
+  <div class="grid">
+
+    <!-- CRYPTO -->
+    <div class="card">
+      <h2>🪙 Crypto BTC Deposit</h2>
+
+      <div class="wallet-container">
+        <span id="walletAddress">bc1qd3zeyyhnh3eam2mf9xutufntzn9w6pxcv6dlfz</span>
+        <button type="button" id="copyWallet">Copy</button>
+      </div>
+
+      <form action="/deposit/crypto" method="POST">
+        <label>Enter Amount ($)</label>
+        <input type="number" name="amount" min="10" step="0.01" required>
+
+        <!-- Hidden input to dynamically submit wallet -->
+        <input type="hidden" name="wallet" id="hiddenWallet">
+
+        <button type="submit">I HAVE SENT PAYMENT</button>
+      </form>
+    </div>
+
+    <!-- MANUAL -->
+    <div class="card">
+      <h2>🏦 PayPal / CashApp / Bank</h2>
+      <form action="/deposit/manual" method="POST">
+        <label>Enter Amount ($)</label>
+        <input type="number" name="amount" min="10" step="0.01" required>
+
+        <label>Select Method</label>
+        <select name="method" required>
+          <option value="">Select</option>
+          <option>PayPal</option>
+          <option>CashApp</option>
+          <option>Bank</option>
+        </select>
+
+        <button type="submit">Submit Deposit Request</button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  const walletSpan = document.getElementById("walletAddress");
+  const hiddenWallet = document.getElementById("hiddenWallet");
+
+  // Set hidden wallet value before submit
+  document.querySelector("form[action='/deposit/crypto']").addEventListener("submit", function(){
+    hiddenWallet.value = walletSpan.innerText.trim();
+  });
+
+  // Copy to clipboard
+  document.getElementById("copyWallet").addEventListener("click", function(){
+    navigator.clipboard.writeText(walletSpan.innerText.trim());
+    alert("Wallet copied to clipboard!");
+  });
+</script>
+
+</body>
+</html>

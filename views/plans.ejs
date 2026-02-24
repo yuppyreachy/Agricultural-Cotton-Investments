@@ -1,0 +1,14 @@
+<h1>Investment Plans</h1>
+<% plans.forEach(plan => { %>
+  <div class="plan-card">
+    <h2><%= plan.name %></h2>
+    <p>Min: $<%= plan.min_amount %> | Max: $<%= plan.max_amount %></p>
+    <p>Duration: <%= plan.duration_days %> days</p>
+    <p>Daily Profit: <%= plan.daily_profit_percent %>%</p>
+    <form action="/invest" method="POST">
+      <input type="hidden" name="plan_id" value="<%= plan.id %>">
+      <input type="number" name="amount" placeholder="Enter amount">
+      <button type="submit">Invest Now</button>
+    </form>
+  </div>
+<% }) %>

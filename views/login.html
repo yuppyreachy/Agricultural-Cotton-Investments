@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Secure Login</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+body{
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.login-container{
+    background:#fff;
+    width:380px;
+    padding:40px;
+    border-radius:15px;
+    box-shadow:0 15px 40px rgba(0,0,0,0.3);
+    text-align:center;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:10px;
+    color:#4facfe;
+}
+
+h1{margin-bottom:5px;}
+p{color:gray;margin-bottom:20px;font-size:14px;}
+
+.input-box{
+    position:relative;
+    margin-bottom:18px;
+}
+
+.input-box input{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    background:#f1f1f1;
+    font-size:15px;
+}
+
+.input-box input:focus{
+    outline:none;
+    background:#e8f0fe;
+    border:1px solid #4facfe;
+}
+
+/* show password icon */
+.show-pass{
+    position:absolute;
+    right:12px;
+    top:14px;
+    cursor:pointer;
+    font-size:13px;
+    color:#555;
+}
+
+.login-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:8px;
+    background:linear-gradient(45deg,#4facfe,#00f2fe);
+    color:#fff;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.login-btn:hover{opacity:0.9;}
+
+.options{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:13px;
+    margin-bottom:15px;
+}
+
+.links{
+    margin-top:15px;
+    font-size:14px;
+}
+
+.links a{
+    text-decoration:none;
+    color:#4facfe;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-container">
+    <div class="logo">💎 SECURE BANK</div>
+    <h1>Welcome Back</h1>
+    <p>Login to your dashboard</p>
+
+    <form action="/login" method="POST">
+
+        <!-- email -->
+        <div class="input-box">
+            <input type="email" id="email" name="email" placeholder="Enter Email" required>
+        </div>
+
+        <!-- password -->
+        <div class="input-box">
+            <input type="password" id="password" name="password" placeholder="Enter Password" required>
+            <span class="show-pass" onclick="togglePassword()">Show</span>
+        </div>
+
+        <!-- remember -->
+        <div class="options">
+            <label>
+                <input type="checkbox" id="remember"> Remember me
+            </label>
+            <a href="/forgot-password">Forgot?</a>
+        </div>
+
+        <button class="login-btn" type="submit" onclick="saveLogin()">Login Account</button>
+    </form>
+
+    <div class="links">
+        Don't have account? <a href="/register">Register</a>
+    </div>
+</div>
+
+<script>
+// SHOW / HIDE PASSWORD
+function togglePassword(){
+    let pass = document.getElementById("password");
+    let btn = document.querySelector(".show-pass");
+
+    if(pass.type === "password"){
+        pass.type = "text";
+        btn.innerText = "Hide";
+    }else{
+        pass.type = "password";
+        btn.innerText = "Show";
+    }
+}
+
+// SAVE LOGIN (REMEMBER ME)
+function saveLogin(){
+    let remember = document.getElementById("remember").checked;
+    let email = document.getElementById("email").value;
+
+    if(remember){
+        localStorage.setItem("savedEmail", email);
+    }else{
+        localStorage.removeItem("savedEmail");
+    }
+}
+
+// AUTO LOAD SAVED EMAIL
+window.onload = function(){
+    let saved = localStorage.getItem("savedEmail");
+    if(saved){
+        document.getElementById("email").value = saved;
+        document.getElementById("remember").checked = true;
+    }
+}
+</script>
+
+</body>
+</html>

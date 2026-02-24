@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elite Investor Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+/* ================= RESET ================= */
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#0f0f0f;color:#fff;overflow-x:hidden;}
+a{text-decoration:none;color:#ccc;transition:.3s;}
+a:hover{color:#00f0ff;}
+
+/* ================= SIDEBAR ================= */
+.sidebar{
+    position:fixed;width:250px;height:100vh;background:#111;padding:30px 20px;border-right:1px solid rgba(255,215,0,0.2);
+    display:flex;flex-direction:column;
+}
+.sidebar h2{color:gold;text-align:center;margin-bottom:30px;font-weight:700;font-size:22px;}
+.sidebar a{display:block;padding:12px;margin-bottom:10px;border-radius:8px;}
+.sidebar a:hover{background:gold;color:#000;transform:translateX(5px);}
+
+/* ================= MAIN ================= */
+.main{margin-left:270px;padding:20px;display:flex;flex-wrap:wrap;gap:20px;justify-content:flex-start;}
+
+/* ================= CARDS ================= */
+.card,.premium-card{
+    background:linear-gradient(135deg,#111,#222);
+    border-radius:15px;
+    padding:15px;
+    box-shadow:0 0 25px rgba(255,215,0,0.2);
+    transition:0.3s;
+}
+.card:hover,.premium-card:hover{box-shadow:0 0 35px rgba(255,215,0,0.4);transform:translateY(-2px);}
+.card h3,.premium-card h3{color:gold;margin-bottom:10px;}
+
+/* ================= PROFILE CARD ================= */
+.profile-card{display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap;}
+.profile-left{display:flex;align-items:center;gap:15px;}
+.profile-left img{width:80px;height:80px;border-radius:50%;border:2px solid gold;}
+.profile-left .info h3{color:gold;font-size:18px;margin-bottom:5px;}
+.profile-left .info p{color:#ccc;font-size:13px;margin:2px 0;}
+.profile-right{text-align:center;background:linear-gradient(135deg,#222,#111);padding:15px;border-radius:12px;min-width:140px;box-shadow:0 0 20px rgba(255,215,0,0.4);}
+.profile-right h4{color:#ffd700;margin-bottom:8px;font-size:14px;}
+.profile-right p{color:#fff;font-size:13px;font-weight:500;}
+
+/* ================= GALLERY ================= */
+.gallery-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:12px;
+}
+.gallery-grid img{
+    width:100%;
+    height:120px;
+    object-fit:cover;
+    border-radius:12px;
+    transition:.3s ease;
+    cursor:pointer;
+}
+.gallery-grid img:hover{transform:scale(1.05);}
+
+/* ================= TOP INVESTORS ================= */
+.investor-grid{display:grid;gap:10px;}
+.investor-item{display:flex;justify-content:space-between;padding:10px 15px;border-radius:12px;background:rgba(0,240,255,0.05);font-size:14px;transition:.3s;}
+.investor-item strong{color:#00f0ff;}
+.investor-item:hover{background:rgba(0,240,255,0.15);}
+
+/* ================= INVESTOR REVIEWS ================= */
+.review-grid{display:grid;gap:12px;}
+.review-item{background:rgba(255,255,255,0.04);padding:12px;border-radius:12px;font-size:13px;transition:.3s;}
+.review-item:hover{background:rgba(255,255,255,0.08);}
+
+/* ================= NEWS ================= */
+.media-column{display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto;}
+.media-post{background:#1a1a1a;padding:10px;border-radius:10px;box-shadow:0 0 15px rgba(255,215,0,0.2);}
+.media-post h4{color:gold;font-size:13px;margin-bottom:3px;}
+.media-post p{color:#ccc;font-size:12px;}
+
+/* ================= CHAT ================= */
+.chat-column{display:flex;flex-direction:column;gap:10px;height:500px;overflow-y:auto;padding:15px;background:#111;border-radius:12px;box-shadow:0 0 15px rgba(255,215,0,0.2);}
+#chatInput{width:100%; height:45px; padding:10px; border-radius:10px; border:none; outline:none; font-size:14px; margin-top:10px;}
+
+/* ================= CHARTS ================= */
+.chart-container{padding:10px;border-radius:10px;margin-bottom:20px;background:#111;}
+
+/* ================= PREMIUM SECTION (GALLERY + INVESTORS + REVIEWS) ================= */
+.premium-section{display:grid;grid-template-columns:repeat(3,1fr);gap:25px;margin-top:25px;}
+.premium-card{padding:20px;border-radius:20px;background:rgba(255,255,255,0.05);backdrop-filter:blur(15px);border:1px solid rgba(255,255,255,0.08);box-shadow:0 10px 30px rgba(0,0,0,0.4);}
+.premium-card:hover{transform:translateY(-5px);box-shadow:0 20px 40px rgba(0,0,0,0.6);}
+.premium-card h3{margin-bottom:15px;color:#00f0ff;}
+
+/* ================= MOBILE ================= */
+@media(max-width:1200px){.main{flex-direction:column;margin-left:0;}.sidebar{position:relative;width:100%;height:auto;}}
+@media(max-width:1100px){.premium-section{grid-template-columns:1fr 1fr;}}
+@media(max-width:700px){.premium-section{grid-template-columns:1fr;}.gallery-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:500px){.chat-column{height:300px;} #chatInput{height:35px;} .chart-container{width:90%;}}
+</style>
+</head>
+<body>
+
+<!-- ================= SIDEBAR ================= -->
+<div class="sidebar">
+    <h2>ELITE INVESTOR</h2>
+    <a href="/dashboard">Dashboard</a>
+    <a href="/deposit">Deposit</a>
+    <a href="/investment">Investment</a>
+    <a href="/withdraw">Withdraw</a>
+    <a href="/transaction">Transaction</a>
+    <a href="/loan">Loan</a>
+    <a href="/kyc">KYC</a>
+    <a href="/settings">Settings</a>
+    <a href="/about">About</a>
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/logout">Logout</a>
+</div>
+
+<!-- ================= MAIN ================= -->
+<div class="main">
+
+    <!-- LEFT COLUMN -->
+    <div class="column">
+
+        <!-- PROFILE CARD -->
+        <div class="card profile-card">
+            <div class="profile-left">
+                <img src="https://i.imgur.com/3VQX1Xu.png" alt="Profile">
+                <div class="info">
+                    <h3><%= user.fullname %></h3>
+                    <p>Email: <%= user.email %></p>
+                    <p>Balance: $<span id="walletBalance"><%= user.balance %></span> <button onclick="copyWallet()">📋 Copy</button></p>
+                    <p>Profit: $<%= user.profit || 0 %></p>
+                    <p>Welcome Bonus: $250</p>
+                </div>
+            </div>
+            <div class="profile-right">
+                <h4>Account Status</h4>
+                <p><strong>KYC:</strong> <%= user.kyc_status ? "No ❌" : "Pending ⚠️" %></p>
+                <p><strong>Loan Eligible:</strong> <%= user.loan_eligible ? "Yes ✅" : "No ❌" %></p>
+                <p style="color:#ffd700;font-weight:700;">VIP Elite</p>
+            </div>
+        </div>
+
+        <!-- PREMIUM SECTION -->
+        <div class="premium-section">
+            <!-- GALLERY -->
+            <div class="premium-card">
+                <h3>📸 Company Highlights</h3>
+                <div class="gallery-grid">
+                    <img src="/media/cotton1.jpg" alt="">
+                    <img src="/media/cotton2.jpg" alt="">
+                    <img src="/media/cotton3.jpg" alt="">
+                    <img src="/media/cotton4.jpg" alt="">
+                </div>
+            </div>
+
+            <!-- TOP INVESTORS -->
+            <div class="premium-card">
+                <h3>🏆 Top Investors</h3>
+                <div class="investor-grid">
+                    <div class="investor-item"><span>William Donald</span><strong>815%</strong></div>
+                    <div class="investor-item"><span>Sarah W.</span><strong>614.5%</strong></div>
+                    <div class="investor-item"><span>Mike B.</span><strong>513.9%</strong></div>
+                    <div class="investor-item"><span>Micheal Robbinson</span><strong>513.5%</strong></div>
+                </div>
+            </div>
+
+            <!-- INVESTOR REVIEWS -->
+            <div class="premium-card">
+                <h3>💬 Investor Reviews</h3>
+                <div class="review-grid">
+                    <div class="review-item">⭐️⭐️⭐️⭐️⭐️ Great platform for consistent returns!</div>
+                    <div class="review-item">⭐️⭐️⭐️⭐️⭐️ VIP support is amazing.</div>
+                    <div class="review-item">⭐️⭐️⭐️⭐️⭐️ Love the golden investment plans.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- NEWS -->
+        <div class="card media-column">
+            <h3>NEWS AND UPDATE</h3>
+            <div class="media-post"><h4>New Gold Investment Plan</h4><p>Launched this week for VIP Elite members!</p></div>
+            <div class="media-post"><h4>Company Profits</h4><p>Reached $50M this quarter.</p></div>
+            <div class="media-post"><h4>Weekly ROI Update</h4><p>VIP Elite investors earn extra 12% weekly.</p></div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="column" style="flex:1; min-width:300px; max-width:400px; display:flex; flex-direction:column; gap:20px;">
+
+        <!-- LIVE CHAT -->
+        <div class="card chat-column" id="chatColumn">
+            <h3>Live Chat</h3>
+            <div class="chat-message user">Hello Admin, I need help with my investment.</div>
+            <div class="chat-message admin">Hi <%= user.fullname.split(" ")[0] %>! How can I assist you today?</div>
+        </div>
+        <input id="chatInput" type="text" placeholder="Type a message...">
+
+        <!-- PROFIT CHART -->
+        <div class="card chart-container">
+            <h3>Company Profit</h3>
+            <canvas id="profitChart" width="300" height="150"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- LIVE ROI CHART (FLOATING) -->
+<div class="card chart-container" style="position:fixed;bottom:20px;right:20px;width:420px;height:250px;background:#111;padding:20px;border-radius:15px;box-shadow:0 10px 35px rgba(0,0,0,0.2);z-index:1000;">
+    <h3 style="text-align:center;color:#00f0ff;margin-bottom:15px;">Live ROI & Company Profits</h3>
+    <canvas id="roiChart" width="400" height="200"></canvas>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+const chatInput = document.getElementById("chatInput");
+const chatColumn = document.getElementById("chatColumn");
+
+// Current logged-in user's ID (from server-side template)
+const userId = "<%= user._id %>";
+
+// -------------------------
+// JOIN AS USER
+// -------------------------
+socket.emit("user-join", userId);
+
+// -------------------------
+// SEND MESSAGE TO ADMIN
+// -------------------------
+chatInput.addEventListener("keypress", e => {
+    if (e.key === "Enter" && chatInput.value.trim() !== "") {
+        const text = chatInput.value.trim();
+
+        // Send to server
+        socket.emit("user-message", { userId, text });
+
+        // Show locally
+        displayMessage({ sender: "user", text });
+
+        chatInput.value = "";
+    }
+});
+
+// -------------------------
+// RECEIVE MESSAGES (FROM SERVER)
+// -------------------------
+socket.on("receive-message", msg => {
+    displayMessage(msg);
+});
+
+// -------------------------
+// ADMIN ONLINE / OFFLINE NOTIFICATIONS
+// -------------------------
+socket.on("admin-online", () => {
+    displaySystemMessage("Admin is online ✅");
+});
+
+socket.on("admin-offline", () => {
+    displaySystemMessage("Admin is offline ⚠️");
+});
+
+// -------------------------
+// HELPER FUNCTIONS
+// -------------------------
+function displayMessage(msg) {
+    const div = document.createElement("div");
+    div.classList.add("chat-message", msg.sender);
+    const senderLabel = msg.sender === "admin" ? "ADMIN" : msg.sender === "system" ? "SYSTEM" : "YOU";
+    div.textContent = `${senderLabel}: ${msg.text}`;
+    chatColumn.appendChild(div);
+    chatColumn.scrollTop = chatColumn.scrollHeight;
+}
+
+function displaySystemMessage(text) {
+    const div = document.createElement("div");
+    div.classList.add("chat-message", "system");
+    div.textContent = `SYSTEM: ${text}`;
+    chatColumn.appendChild(div);
+    chatColumn.scrollTop = chatColumn.scrollHeight;
+}
+
+
+// ================= CHARTS =================
+const roiCtx = document.getElementById('roiChart').getContext('2d');
+const profitCtx = document.getElementById('profitChart').getContext('2d');
+
+const gradientCompany = roiCtx.createLinearGradient(0,0,0,400);
+gradientCompany.addColorStop(0,'rgba(255,215,0,0.5)');
+gradientCompany.addColorStop(1,'rgba(255,215,0,0.05)');
+const gradientROI = roiCtx.createLinearGradient(0,0,0,400);
+gradientROI.addColorStop(0,'rgba(0,255,234,0.5)');
+gradientROI.addColorStop(1,'rgba(0,255,234,0.05)');
+
+const roiChart = new Chart(roiCtx,{
+    type:'line',
+    data:{
+        labels:['Week 1','Week 2','Week 3','Week 4','Week 5','Week 6'],
+        datasets:[
+            {label:'Company Profit ($M)',data:[10,12,13,14,14.5,15],borderColor:'gold',backgroundColor:gradientCompany,tension:0.4,fill:true,pointBackgroundColor:'gold',pointBorderColor:'#fff',pointRadius:6,pointHoverRadius:8,borderWidth:3},
+            {label:'Live ROI (%)',data:[10,11,11.5,12,12.5,12],borderColor:'#00ffea',backgroundColor:gradientROI,tension:0.4,fill:true,pointBackgroundColor:'#00ffea',pointBorderColor:'#fff',pointRadius:6,pointHoverRadius:8,borderWidth:3}
+        ]
+    },
+    options:{responsive:true,maintainAspectRatio:false}
+});
+
+const profitChart = new Chart(profitCtx,{
+    type:'line',
+    data:{labels:[],datasets:[{label:'Profit ($)',borderColor:'green',data:[],fill:true}]},
+    options:{responsive:true,animation:false,scales:{y:{beginAtZero:true}}}
+});
+
+socket.on('liveData', data=>{
+    const time = new Date().toLocaleTimeString();
+
+    if(roiChart.data.labels.length>20){roiChart.data.labels.shift();roiChart.data.datasets[1].data.shift();}
+    roiChart.data.labels.push(time);
+    roiChart.data.datasets[1].data.push(data.roi);
+    roiChart.update();
+
+    if(profitChart.data.labels.length>20){profitChart.data.labels.shift();profitChart.data.datasets[0].data.shift();}
+    profitChart.data.labels.push(time);
+    profitChart.data.datasets[0].data.push(data.profit);
+    profitChart.update();
+});
+</script>
+
+</body>
+</html>

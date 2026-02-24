@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Deposit Approval</title>
+<style>
+body{background:#0f172a; color:#fff; font-family:Arial; padding:20px;}
+h1{color:#38bdf8; text-align:center;}
+table{width:100%; border-collapse:collapse; margin-top:20px;}
+th,td{padding:10px; border-bottom:1px solid #1e293b;}
+th{color:#38bdf8;}
+button{padding:6px 10px; border:none; border-radius:5px; background:#38bdf8; color:#000; cursor:pointer;}
+button:hover{opacity:0.9;}
+</style>
+</head>
+<body>
+
+<h1>💎 Admin Deposit Requests</h1>
+<table>
+<tr>
+<th>User</th>
+<th>Amount</th>
+<th>Method</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+<tbody id="requestTable">
+<!-- Admin requests injected here -->
+</tbody>
+</table><table>
+  <tr>
+    <th>User</th>
+    <th>Amount</th>
+    <th>Method</th>
+    <th>Status</th>
+    <th>Action</th>
+  </tr>
+  <tbody id="requestTable"></tbody>
+</table>
+
+async function generateTemp(id, method){
+    const temp = prompt(`Enter temporary ${method} payment details`);
+    if(!temp) return;
+    await fetch("/admin/generate-temp", {
+        method:"POST",
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({id,temp_payment:temp})
+    });
+    alert("Temporary payment generated (15 min)");
+    loadRequests();
+}
+
+
+<script>
+async function loadRequests(){
+    const res = await fetch("/admin/deposit-requests");
+    const data = await res.json();
+    let html = "";
+    data.forEach(r=>{
+        html += `<tr>
+        <td>${r.fullname}</td>
+        <td>$${r.amount}</td>
+        <td>${r.method}</td>
+        <td>${r.status}</td>
+        <td>
+        <button onclick="generateTemp('${r.id}','${r.method}')">Generate Temp Payment</button>
+        </td>
+        </tr>`;
+    });
+    document.getElementById("requestTable").innerHTML = html;
+}
+
+async function generateTemp(id, method){
+    const temp = prompt(`Enter temporary ${method} payment details`);
+    if(!temp) return alert("Cancelled");
+
+    await fetch("/admin/generate-temp",{
+        method:"POST",
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({id,temp})
+    });
+    alert("Temporary payment generated for 15 mins!");
+    loadRequests();
+}
+
+loadRequests();
+</script>
+
+</body>
+</html>

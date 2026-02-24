@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Deposit Submitted</title>
+  <style>
+    body { font-family: Arial; background: #f4f6f8; color: #333; }
+    .container { max-width: 500px; margin: 50px auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+    h1 { color: #27ae60; }
+    .crypto-address { background: #f1f1f1; padding: 10px; border-radius: 6px; font-weight: bold; margin-top: 10px; }
+    a { display: inline-block; margin-top: 20px; color: #2980b9; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Deposit Requested</h1>
+    <p>You requested to deposit <b>$<%= amount %></b> via <b><%= method %></b>.</p>
+
+    <% if (method === "Bitcoin") { %>
+      <div class="crypto-address">
+        Send BTC to: <%= cryptoAddress %>
+      </div>
+    <% } else { %>
+      <p>Wait for admin to provide payment instructions.</p>
+    <% } %>
+
+    <p>Status: Pending approval</p>
+    <a href="/deposit">Back to Deposit</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<h1>🚀 Loan Requests</h1>
+<table border="1" cellpadding="10">
+<tr>
+    <th>ID</th>
+    <th>User</th>
+    <th>Documents</th>
+    <th>Employment</th>
+    <th>Loan Duration</th>
+    <th>Status</th>
+    <th>Actions</th>
+</tr>
+<% loans.forEach(loan => { %>
+<tr>
+    <td><%= loan.id %></td>
+    <td><%= loan.fullname %></td>
+    <td>
+        <a href="<%= path + loan.id_front %>" target="_blank">ID Front</a> | 
+        <a href="<%= path + loan.id_back %>" target="_blank">ID Back</a> | 
+        <a href="<%= path + loan.signature_file %>" target="_blank">Signature</a> | 
+        <a href="<%= path + loan.credit_score %>" target="_blank">Credit Score</a> | 
+        <a href="<%= path + loan.bank_statement %>" target="_blank">Bank Statement</a>
+    </td>
+    <td><%= loan.employment %></td>
+    <td><%= loan.loan_duration %></td>
+    <td><%= loan.status %></td>
+    <td>
+        <% if(loan.status === 'pending') { %>
+            <form action="/admin/loans/approve/<%= loan.id %>" method="POST" style="display:inline;">
+                <button style="background:green;color:white;">Approve</button>
+            </form>
+            <form action="/admin/loans/reject/<%= loan.id %>" method="POST" style="display:inline;">
+                <button style="background:red;color:white;">Reject</button>
+            </form>
+        <% } else { %>
+            N/A
+        <% } %>
+    </td>
+</tr>
+<% }) %>
+</table>
