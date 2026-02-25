@@ -91,6 +91,7 @@ document.addEventListener("DOMContentLoaded",()=>{
             location.reload();
         });
     });
+    
 
     const rejectBtns = document.querySelectorAll(".reject");
     rejectBtns.forEach(btn=>{
