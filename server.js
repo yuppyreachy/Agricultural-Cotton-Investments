@@ -4,6 +4,8 @@ const app = express();
 const nodemailer = require("nodemailer");
 const path = require("path");
 const http = require('http');
+const server = http.createServer(app);
+const io = new Server(server); // Correct: new Server from socket.io
 const io = require('socket.io')(http);
 const dotenv = require('dotenv');
 dotenv.config();
@@ -1143,8 +1145,11 @@ setInterval(() => {
   io.emit("liveData", { roi, profit });
 }, 3000);
 
+
 // ======================
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
+
