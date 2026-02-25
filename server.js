@@ -1,28 +1,30 @@
 require("dotenv").config();
+
 const express = require("express");
 const app = express();
-const nodemailer = require("nodemailer");
 const path = require("path");
-const http = require('http');
-const server = http.createServer(app);
-const io = new Server(server); // Correct: new Server from socket.io
-const io = require('socket.io')(http);
-const dotenv = require('dotenv');
-dotenv.config();
+const http = require("http");
 const { Server } = require("socket.io");
+const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const multer = require("multer");
 const session = require("express-session");
 const axios = require("axios");
 const fetch = require("node-fetch");
-const adminPass = process.env.ADMIN_PASS;
-const adminRoutes = require('./routes/adminroutes');
-const sendMail = require("./routes/mailer");
-const contactRoute = require('./routes/contactRoutes');
-
-const server = http.createServer(app);
 const sgMail = require("@sendgrid/mail");
 
+// Create HTTP server
+const server = http.createServer(app);
+
+// Attach socket.io
+const io = new Server(server);
+
+// Routes
+const adminRoutes = require("./routes/adminroutes");
+const sendMail = require("./routes/mailer");
+const contactRoute = require("./routes/contactRoutes");
+
+const adminPass = process.env.ADMIN_PASS;
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -1144,7 +1146,7 @@ setInterval(() => {
   const profit = (Math.random() * 5 + 10).toFixed(2);
   io.emit("liveData", { roi, profit });
 }, 3000);
- 
+
 
 // ======================
 const PORT = process.env.PORT || 3000;
