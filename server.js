@@ -12,6 +12,10 @@ const session = require("express-session");
 const axios = require("axios");
 const fetch = require("node-fetch");
 const sgMail = require("@sendgrid/mail");
+const fs = require("fs");
+
+
+
 
 // Create HTTP server
 const server = http.createServer(app);
@@ -44,7 +48,11 @@ module.exports = sendEmail;
 
 const db = require("./db");
 const authRoutes = require("./routes/authRoutes");
+const uploadDir = path.join(__dirname, "uploads");
 
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 // ======================
 // DATABASE PROMISE HELPERS
 // ======================
@@ -87,13 +95,17 @@ app.set("view engine", "ejs");
 // ======================
 // MULTER SETUP
 // ======================
+
+
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "public/uploads"),
-  filename: (req, file, cb) => {
-    const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, unique + path.extname(file.originalname));
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
   },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
 });
+
 const upload = multer({ storage });
 
 // ======================
@@ -461,7 +473,7 @@ app.get("/deposit", (req, res) => {
   res.render("deposit");
 });
 app.get("/admin/dashboard", (req, res) => {
-  if(!req.session.admin) return res.redirect("/admin-login");
+  if(!req.session.admin) return res.redirect("/admin");
   res.send("Welcome Admin! 🚀");
 });
 
@@ -950,22 +962,6 @@ app.post("/send-otp", (req, res) => {
     });
 });
 
-app.post("/admin-login", (req, res) => {
-  const { username, password } = req.body;
-
-  console.log("Entered:", username, password);
-  console.log("Expected:", process.env.ADMIN_USER, process.env.ADMIN_PASS);
-
-  if (
-    username === process.env.ADMIN_USER &&
-    password === process.env.ADMIN_PASS
-  ) {
-    req.session.admin = true;
-    return res.redirect("/admin/dashboard");
-  }
-
-  res.send("Invalid admin login ❌");
-});
 
 app.post("/reset-password", async (req,res) => {
   const { email, password } = req.body;
