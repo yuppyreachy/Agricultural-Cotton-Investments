@@ -159,7 +159,7 @@ fetch("/api/user")
       div.innerHTML = `<h4>${inv.name}</h4><p>Investment: $${inv.investment.toLocaleString()}</p><p>ROI: ${inv.roi}%</p>`;
       vipContainer.appendChild(div);
     });
-
+ 
     // ==================
     // Company Achievements
     // ==================
