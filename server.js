@@ -1144,7 +1144,7 @@ setInterval(() => {
   const profit = (Math.random() * 5 + 10).toFixed(2);
   io.emit("liveData", { roi, profit });
 }, 3000);
-
+ 
 
 // ======================
 const PORT = process.env.PORT || 3000;
