@@ -4,26 +4,21 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const path = require("path");
 const multer = require("multer");
-const { promisify } = require("util");
+const pool = require("../dbPostgres");
+const sendEmail = require("../utils/emailService");
 const axios = require("axios");
-const db = require("../db");
-const sendEmail = require('../utils/emailService'); // ✅ relative path
-
-
-// ----- Multer setup for KYC uploads -----
+// ===== Multer setup =====
 const storage = multer.diskStorage({
   destination: (req, file, cb) =>
     cb(null, path.join(__dirname, "../uploads/")),
   filename: (req, file, cb) =>
     cb(null, Date.now() + path.extname(file.originalname))
 });
+
 const upload = multer({ storage });
 
-// ----- Promisified DB functions -----
-const dbGet = promisify(db.get.bind(db));
-const dbRun = promisify(db.run.bind(db));
-
-// ===== REGISTER ROUTE =====
+// ===== REGISTER =====
+// ===== REGISTER =====
 router.post(
   "/register",
   upload.fields([
@@ -32,15 +27,25 @@ router.post(
   ]),
   async (req, res) => {
     try {
+
       const {
-        fullname, dob, email, phone, gender, marital_status,
-        pin, farmer, investor, password, confirm_password, source
+        fullname,
+        dob,
+        email,
+        phone,
+        gender,
+        marital_status,
+        pin,
+        farmer,
+        investor,
+        password,
+        confirm_password
       } = req.body;
 
-      // ====== Basic Validation ======
-      if (!fullname || !dob || !email || !phone || !gender ||
-          !marital_status || !pin || !farmer || !investor ||
-          !password || !confirm_password || !source) {
+      if (
+        !fullname || !dob || !email || !phone || !gender ||
+        !marital_status || !pin || !password || !confirm_password
+      ) {
         return res.status(400).send("All fields are required!");
       }
 
@@ -48,182 +53,210 @@ router.post(
         return res.status(400).send("Passwords do not match!");
       }
 
-      // ====== Uploaded Files ======
-      const idCard = req.files["id_card"]?.[0]?.filename;
-      const passportPhoto = req.files["passport_photo"]?.[0]?.filename;
+      const idCard = req.files?.id_card?.[0]?.filename || null;
+      const passportPhoto = req.files?.passport_photo?.[0]?.filename || null;
 
-      if (!idCard || !passportPhoto) {
-        return res.status(400).send("Please upload both ID and passport photo!");
+      // check existing email
+      const existing = await pool.query(
+        "SELECT id FROM users WHERE email=$1",
+        [email]
+      );
+
+      if (existing.rows.length > 0) {
+        return res.status(400).send("Email already registered!");
       }
 
-      // ====== Check if user exists ======
-      const userExists = await dbGet("SELECT id FROM users WHERE email = ?", [email]);
-      if (userExists) return res.status(400).send("Email already registered!");
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-      // ====== Hash Password ======
-      let hashedPassword;
-      try {
-        hashedPassword = await bcrypt.hash(password, 10);
-      } catch (e) {
-        console.error("Password hashing failed:", e);
-        return res.status(500).send("Server error during password hashing");
-      }
-
-      // ====== Generate UID ======
       const uid = `UID${Date.now()}${Math.floor(Math.random() * 1000)}`;
 
-      // ====== Insert into DB ======
-      await dbRun(`
+      // INSERT USER
+      await pool.query(
+        `
         INSERT INTO users
         (uid, fullname, dob, email, phone, gender, marital_status,
-         pin, farmer, investor, password,
-         id_card, passport_photo, source,
-         balance, kyc_status, role, created_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))
-      `, [
-        uid, fullname, dob, email, phone, gender, marital_status,
-        pin, farmer, investor, hashedPassword,
-        idCard, passportPhoto, source,
-        100, "Pending", "user"
-      ]);
+        pin, farmer, investor, password, id_card, passport_photo)
+        VALUES
+        ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+        `,
+        [
+          uid,
+          fullname,
+          dob,
+          email,
+          phone,
+          gender,
+          marital_status,
+          pin,
+          farmer === "true" || farmer === "on",
+          investor === "true" || investor === "on",
+          hashedPassword,
+          idCard,
+          passportPhoto
+        ]
+      );
 
-      // ====== Telegram Notification ======
-      if (process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID) {
-        const message = `
-✅ New User Registered
-👤 Name: ${fullname}
-📧 Email: ${email}
-💰 Initial Balance: $100
-        `;
-        axios.post(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
-          chat_id: process.env.TELEGRAM_CHAT_ID,
-          text: message
-        }).catch(err => console.error("Telegram error:", err));
-      }
+      // ===== EMAIL NOTIFICATION =====
+await sendEmail(
+  email,
+  "Registration Successful",
+  `
+  <h2>Welcome ${fullname}</h2>
+  <p>Your account was created successfully.</p>
+  <p><b>UID:</b> ${uid}</p>
+  <p>You can now login to your dashboard.</p>
+  `
+);
 
-      // ====== Welcome Email ======
-      const transporter = req.app.locals.transporter;
-      if (transporter) {
-        transporter.sendMail({
-          from: process.env.EMAIL_USER,
-          to: email,
-          subject: "Welcome to Elite Platform 🎉",
-          html: `<h2>Welcome, ${fullname}!</h2>
-                 <p>Your initial balance of $100 has been credited.</p>
-                 <p>💼 <b>Your Login Email:</b> ${email}</p>`
-        }).catch(err => console.error("Email error:", err));
-      }
+      // ===== TELEGRAM NOTIFICATION =====
+      const telegramMessage = `
+New User Registered
 
-      console.log(`✅ New user registered: ${email}`);
+Name: ${fullname}
+Email: ${email}
+Phone: ${phone}
+UID: ${uid}
+`;
+
+      // ===== SUCCESS PAGE =====
       res.redirect("/success.html");
 
     } catch (err) {
-      console.error("❌ Register error:", err);
+      console.error("Register Error:", err);
       res.status(500).send("Server error");
     }
   }
 );
 
-router.post("/register", async (req, res) => {
-  // after saving user to database
+// ===== LOGIN =====
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-  await sendEmail(
-    req.body.email,
-    "Welcome to Our Investment Platform 🚀",
-    `<h2>Welcome ${req.body.username}</h2>
-     <p>Your account has been created successfully.</p>`
-  );
+    if (!email || !password) {
+      return res.status(400).send("Email and password required");
+    }
 
-  res.redirect("/dashboard");
+    const result = await pool.query(
+      "SELECT * FROM users WHERE email=$1",
+      [email]
+    );
+
+    const user = result.rows[0];
+
+    if (!user) {
+      return res.status(400).send("Invalid email or password");
+    }
+
+    // ===== Password check for old + new users =====
+    let passwordMatch = false;
+
+    // If password is hashed (new user)
+    if (user.password.startsWith("$2b$")) {
+      passwordMatch = await bcrypt.compare(password, user.password);
+    }
+    // If password is plain text (old user)
+    else {
+      passwordMatch = password === user.password;
+
+      // ✅ Upgrade old password to hashed automatically
+      if (passwordMatch) {
+        const newHash = await bcrypt.hash(password, 10);
+        await pool.query("UPDATE users SET password=$1 WHERE id=$2", [newHash, user.id]);
+      }
+    }
+
+    if (!passwordMatch) {
+      return res.status(400).send("Invalid email or password");
+    }
+
+    // ===== Login success =====
+    req.session.user = {
+      id: user.id,
+      email: user.email,
+      fullname: user.fullname
+    };
+
+    res.redirect("/dashboard");
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).send("Server error");
+  }
 });
 
-// ----- LOGIN -----
-router.post("/admin/login", async (req, res) => {
-  const { username, password } = req.body;
-  if(!username || !password) return res.send("❌ Fill all fields");
-
-  const admin = await dbGet("SELECT * FROM admin WHERE username = ?", [username]);
-  if(!admin) return res.send("❌ Admin not found");
-
-  const match = await bcrypt.compare(password, admin.password);
-  if(!match) return res.send("❌ Wrong password");
-
-  req.session.adminId = admin.id;
-  res.redirect("/admin/dashboard");
+// ===== LOGIN PAGE =====
+router.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/login.html"));
 });
 
-// ----- LOGOUT -----
+// ===== LOGOUT =====
 router.get("/logout", (req, res) => {
   req.session.destroy(() => res.redirect("/login"));
 });
 
-// ----- FORGOT PASSWORD -----
-router.get("/forgot-password", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/forgot-password.html"));
-});
-
+// ===== FORGOT PASSWORD =====
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).send("Email required");
 
-    const user = await dbGet("SELECT * FROM users WHERE email = ?", [email]);
-    if (!user) return res.status(404).send("Email not registered");
+    const result = await pool.query(
+      "SELECT * FROM users WHERE email=$1",
+      [email]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Email not registered");
+    }
 
     const otp = Math.floor(100000 + Math.random() * 900000);
+
     req.session.otp = otp;
     req.session.otpEmail = email;
 
-    if (req.app.locals.transporter) {
-      req.app.locals.transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "OTP for Password Reset",
-        text: `Your OTP is ${otp}`
-      });
-    }
+    console.log("OTP:", otp);
 
     res.redirect(`/verify-otp.html?email=${encodeURIComponent(email)}`);
-
   } catch (err) {
-    console.error("Forgot password error:", err);
+    console.error(err);
     res.status(500).send("Server error");
   }
 });
 
-// ----- VERIFY OTP -----
+// ===== VERIFY OTP =====
 router.post("/verify-otp", (req, res) => {
   const { email, otp } = req.body;
-  if (!email || !otp) return res.status(400).send("All fields required");
 
-  if (req.session.otp && req.session.otpEmail === email && req.session.otp == otp) {
+  if (
+    req.session.otp &&
+    req.session.otpEmail === email &&
+    req.session.otp == otp
+  ) {
     delete req.session.otp;
     delete req.session.otpEmail;
+
     res.redirect(`/reset-password.html?email=${encodeURIComponent(email)}`);
   } else {
-    return res.status(400).send("Invalid OTP");
+    res.status(400).send("Invalid OTP");
   }
 });
 
-// ----- RESET PASSWORD -----
+// ===== RESET PASSWORD =====
 router.post("/reset-password", async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).send("All fields required");
 
     const hashed = await bcrypt.hash(password, 10);
-    await dbRun("UPDATE users SET password=? WHERE email=?", [hashed, email]);
 
-    res.send("✅ Password reset successful! <a href='/login'>Login</a>");
+    await pool.query(
+      "UPDATE users SET password=$1 WHERE email=$2",
+      [hashed, email]
+    );
+
+    res.send("Password reset successful. <a href='/login'>Login</a>");
   } catch (err) {
-    console.error("Reset password error:", err);
+    console.error(err);
     res.status(500).send("Server error");
   }
-});
-
-// ----- GET LOGIN PAGE -----
-router.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "../public/login.html"));
 });
 
 module.exports = router;
