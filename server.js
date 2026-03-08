@@ -47,13 +47,12 @@ async function sendEmail(to, subject, message) {
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true,
-  family: 4,
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
+    pass: process.env.EMAIL_PASS
+  }
 });
 
 transporter.verify((err) => {
@@ -315,32 +314,7 @@ app.get("/api/users", async (req, res) => {
 // -------------------
 // USER DASHBOARD
 // -------------------
-app.get("/dashboard", checkAuth, async (req, res) => {
-  try {
-    const userId = req.session.userId;
-
-    // Fetch user
-    const { rows: users } = await pool.query(
-      "SELECT * FROM users WHERE id = $1",
-      [userId]
-    );
-    const user = users[0];
-    if (!user) return res.redirect("/login");
-
-    // Balance & deposits
-    const balance = user.balance || 0;
-    const { rows: deposits } = await pool.query(
-      "SELECT * FROM deposits WHERE user_id = $1 ORDER BY created_at DESC",
-      [userId]
-    );
-
-    // Example: render dashboard template with user info
-    res.render("dashboard", { user, balance, deposits });
-  } catch (err) {
-    console.error("Dashboard error:", err);
-    res.status(500).send("Server error");
-  }
-});// -------------------
+// -------------------
 // DASHBOARD EXTRA DATA
 // -------------------
 app.get("/dashboard", checkAuth, async (req, res) => {
@@ -537,37 +511,7 @@ const uploadKyc = upload.fields([
   { name: "signature", maxCount: 1 }
 ]);
 
-app.post("/kyc", checkAuth, (req, res) => {
-  uploadKyc(req, res, async (err) => {
-    try {
-      if (err) return res.status(400).send("File upload error: " + err.message);
 
-      const userId = req.session.userId;
-      if (!userId) return res.status(401).send("Please login first");
-
-      const files = req.files || {};
-      const idFront = files.id_front?.[0]?.filename;
-      const idBack = files.id_back?.[0]?.filename;
-      const ssnProof = files.ssn_proof?.[0]?.filename;
-      const proofAddress = files.proof_address?.[0]?.filename;
-      const signature = files.signature?.[0]?.filename;
-
-      if (!idFront || !idBack || !ssnProof || !proofAddress || !signature)
-        return res.status(400).send("Please upload all required KYC documents");
-
-      // Save KYC info to DB
-      await pool.query(
-        "INSERT INTO kyc_documents (user_id, id_front, id_back, ssn_proof, proof_address, signature) VALUES ($1,$2,$3,$4,$5,$6)",
-        [userId, idFront, idBack, ssnProof, proofAddress, signature]
-      );
-
-      res.send("KYC submitted successfully");
-    } catch (err) {
-      console.error("KYC Error:", err);
-      res.status(500).send("Server error");
-    }
-  });
-});
 // -------------------
 // KYC FORM SUBMISSION
 // -------------------
