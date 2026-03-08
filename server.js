@@ -249,9 +249,8 @@ async function updateInvestmentsProfit() {
 app.get("/deposit", (req, res) => {
     res.sendFile(path.join(__dirname, "public/deposit.html"));
 });
-app.get("/", (req, res) => res.redirect("/login"));
-app.get("/login", (req, res) => {
-  res.sendFile(path.join(__dirname, "public", "login.html"));
+app.get("/", (req, res) => {
+  res.redirect("/login.html");
 });
 app.get("/register", (req, res) => sendPage(res, "register.html"));
 app.get("/withdraw", (req, res) => sendPage(res, "withdraw.html"));
