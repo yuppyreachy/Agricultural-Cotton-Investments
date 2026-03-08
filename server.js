@@ -251,7 +251,9 @@ app.get("/deposit", (req, res) => {
     res.sendFile(path.join(__dirname, "public/deposit.html"));
 });
 app.get("/", (req, res) => res.redirect("/login"));
-app.get("/login", (req, res) => sendPage(res, "login.html"));
+app.get("/login", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "login.html"));
+});
 app.get("/register", (req, res) => sendPage(res, "register.html"));
 app.get("/withdraw", (req, res) => sendPage(res, "withdraw.html"));
 app.get("/kyc", (req, res) => sendPage(res, "kyc.html"));
