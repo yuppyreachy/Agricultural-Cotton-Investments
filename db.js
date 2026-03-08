@@ -1,11 +1,14 @@
-const sqlite3 = require("sqlite3").verbose();
+// db.js
+const { Pool } = require("pg");
+require("dotenv").config();
 
-const db = new sqlite3.Database("./database.sqlite", (err) => {
-  if (err) {
-    console.error("❌ Database connection failed:", err.message);
-  } else {
-    console.log("✅ Connected to SQLite database");
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // only if needed for cloud DBs
   }
 });
 
-module.exports = db;
+pool.on("connect", () => console.log("✅ PostgreSQL connected"));
+
+module.exports = pool;
